@@ -1719,4 +1719,34 @@ window.addEventListener('load',()=>{
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screen-login').style.display!=='none'){if(authMode==='login')doLogin();else doRegister();}});
 </script>
+  <!-- Importar las herramientas de Firebase que necesitas -->
+<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCSvpNYeqNBiND94IUea4Nqq0g3nR1Ya1o",
+  authDomain: "app-tirh-o.firebaseapp.com",
+  projectId: "app-tirh-o",
+  storageBucket: "app-tirh-o.firebasestorage.app",
+  messagingSenderId: "585681879140",
+  appId: "1:585681879140:web:08974f77275b50464f5f71",
+  measurementId: "G-YT3MG3TNGX"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+  // Inicializar Firebase en la web
+  firebase.initializeApp(firebaseConfig);
+  
+  // Ahora tu web ya está conectada al mismo Firebase que tu app de Android
+  console.log("¡Firebase conectado con éxito!");
 </body></html>
