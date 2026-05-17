@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APP TIRH-O</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS (exact from Color.kt) ─────────────────────── */
+:root{
+  --matte-black:#121212; --dark-grey:#1E1E1E; --light-grey:#2C2C2C;
+  --tactical-red:#E53935; --gold-target:#D4AF37; --silver-badge:#BDBDBD;
+  --white-smoke:#F5F5F5; --muted:#666; --green:#43A047; --blue:#42A5F5;
+  --fd:'Bebas Neue',sans-serif; --fb:'Barlow',sans-serif; --fc:'Barlow Condensed',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0A0A;color:var(--white-smoke);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ───────────────────────────────────────────── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:216px;background:var(--matte-black);border-right:1px solid var(--light-grey);display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.logo-wrap{padding:20px 16px 18px;border-bottom:1px solid var(--light-grey);display:flex;align-items:center;gap:10px}
+.logo-mark{width:36px;height:36px;background:var(--tactical-red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;color:#fff;flex-shrink:0}
+.logo-text{font-family:var(--fd);font-size:20px;letter-spacing:2px}
+.logo-sub{font-family:var(--fc);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-sec{padding:7px 16px 2px;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-family:var(--fc);font-weight:700}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;font-family:var(--fc);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);transition:all .15s;position:relative;border:none;background:none;width:100%;text-align:left}
+.ni svg{width:16px;height:16px;flex-shrink:0}
+.ni:hover{color:var(--white-smoke);background:var(--dark-grey)}
+.ni.active{color:var(--tactical-red);background:rgba(229,57,53,.09)}
+.ni.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tactical-red)}
+.badge{margin-left:auto;background:var(--tactical-red);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+.badge.gold{background:var(--gold-target);color:#000}
+.sb-user{padding:12px 16px;border-top:1px solid var(--light-grey);display:flex;align-items:center;gap:10px;cursor:pointer}
+.sb-av{width:32px;height:32px;border-radius:50%;background:var(--dark-grey);border:2px solid var(--tactical-red);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:13px;color:var(--tactical-red);flex-shrink:0}
+
+/* ── MAIN ──────────────────────────────────────────────── */
+.main{margin-left:216px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:54px;background:var(--matte-black);border-bottom:1px solid var(--light-grey);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--fd);font-size:21px;letter-spacing:2px}
+.content{flex:1;padding:24px}
+.screen{display:none}.screen.active{display:block}
+
+/* ── BUTTONS ───────────────────────────────────────────── */
+.btn{padding:7px 14px;border-radius:4px;border:none;cursor:pointer;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--tactical-red);color:#fff}.btn-primary:hover{background:#c62828}
+.btn-ghost{background:transparent;color:var(--silver-badge);border:1px solid var(--light-grey)}.btn-ghost:hover{border-color:var(--silver-badge);color:var(--white-smoke)}
+.btn-gold{background:var(--gold-target);color:#000}.btn-gold:hover{opacity:.9}
+.btn-green{background:var(--green);color:#fff}
+.btn-full{width:100%;justify-content:center;padding:12px;font-size:13px;border-radius:5px}
+
+/* ── FORMS ─────────────────────────────────────────────── */
+.fg{margin-bottom:14px}
+.lbl{display:block;font-family:var(--fc);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+input[type=email],input[type=password],input[type=text],input[type=number],select,textarea{width:100%;background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:4px;padding:9px 11px;color:var(--white-smoke);font-family:var(--fb);font-size:13px;transition:border-color .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--tactical-red)}
+select option{background:var(--dark-grey)}
+textarea{resize:vertical;min-height:70px}
+
+/* ── LOGIN ─────────────────────────────────────────────── */
+#screen-login{position:fixed;inset:0;background:#0A0A0A;display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{width:390px;background:var(--matte-black);border:1px solid var(--light-grey);border-radius:12px;padding:38px 32px;max-height:95vh;overflow-y:auto}
+.login-logo{text-align:center;margin-bottom:26px}
+.login-mark{width:56px;height:56px;background:var(--tactical-red);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:24px;color:#fff;margin:0 auto 9px}
+.login-title{font-family:var(--fd);font-size:32px;letter-spacing:3px}
+.login-sub{font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:3px}
+.l-tabs{display:flex;margin-bottom:20px;background:var(--dark-grey);border-radius:5px;padding:3px}
+.l-tab{flex:1;padding:7px;text-align:center;cursor:pointer;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:3px;transition:all .15s;color:var(--muted);border:none;background:none}
+.l-tab.active{background:var(--tactical-red);color:#fff}
+.l-err{background:rgba(229,57,53,.12);border:1px solid rgba(229,57,53,.3);border-radius:5px;padding:9px 12px;font-size:12px;color:#EF9A9A;margin-bottom:12px;display:none}
+.chk{display:flex;align-items:center;gap:7px;margin-bottom:16px}
+.chk input{width:auto;accent-color:var(--tactical-red)}
+.chk label{margin:0;font-size:12px;text-transform:none;letter-spacing:0;color:var(--silver-badge)}
+.bio-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:5px;color:var(--silver-badge);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:9px;transition:all .15s}
+.bio-btn:hover{border-color:var(--gold-target);color:var(--gold-target)}
+
+/* ── CARDS ─────────────────────────────────────────────── */
+.card{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;overflow:hidden}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--light-grey);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.card-body{padding:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ── STATS ─────────────────────────────────────────────── */
+.stat{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;padding:16px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat.red::before{background:var(--tactical-red)}.stat.gold::before{background:var(--gold-target)}.stat.silver::before{background:var(--silver-badge)}.stat.green::before{background:var(--green)}
+.stat-n{font-family:var(--fd);font-size:34px;line-height:1}
+.stat-l{font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.stat-s{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* ── TABLE ─────────────────────────────────────────────── */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:#1a1a1a;padding:8px 12px;text-align:left;font-family:var(--fc);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--light-grey)}
+td{padding:10px 12px;border-bottom:1px solid var(--light-grey);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.03)}
+
+/* ── PILLS ─────────────────────────────────────────────── */
+.pill{display:inline-block;padding:2px 8px;border-radius:3px;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.p-red{background:rgba(229,57,53,.15);color:var(--tactical-red);border:1px solid rgba(229,57,53,.3)}
+.p-gold{background:rgba(212,175,55,.15);color:var(--gold-target);border:1px solid rgba(212,175,55,.3)}
+.p-green{background:rgba(67,160,71,.15);color:#66BB6A;border:1px solid rgba(67,160,71,.3)}
+.p-silver{background:rgba(189,189,189,.1);color:var(--silver-badge);border:1px solid rgba(189,189,189,.25)}
+.p-blue{background:rgba(66,165,245,.12);color:#64B5F6;border:1px solid rgba(66,165,245,.25)}
+.p-orange{background:rgba(255,152,0,.12);color:#FFA726;border:1px solid rgba(255,152,0,.3)}
+
+/* ── LIVE DOT ───────────────────────────────────────────── */
+.live{display:inline-flex;align-items:center;gap:5px;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tactical-red)}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--tactical-red);animation:lp 1.5s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+
+/* ── MODAL ─────────────────────────────────────────────── */
+.mbd{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;padding:16px}
+.mbd.show{display:flex}
+.modal{background:var(--matte-black);border:1px solid var(--light-grey);border-radius:10px;padding:22px 26px;width:520px;max-width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:var(--fd);font-size:20px;letter-spacing:2px;margin-bottom:14px}
+.modal-close{float:right;background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;margin-top:-2px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* ── ADMIN TABS ─────────────────────────────────────────── */
+.adm-tabs{display:flex;border-bottom:1px solid var(--light-grey);margin-bottom:16px;flex-wrap:wrap}
+.adm-tab{padding:8px 14px;cursor:pointer;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-left:none;border-right:none;border-top:none;transition:all .15s}
+.adm-tab:hover{color:var(--white-smoke)}
+.adm-tab.active{color:var(--tactical-red);border-bottom-color:var(--tactical-red)}
+.adm-panel{display:none}.adm-panel.active{display:block}
+
+/* ── NEWS TABS ─────────────────────────────────────────── */
+.news-tabs{display:flex;background:var(--dark-grey);border-radius:5px;padding:3px;margin-bottom:16px;width:fit-content}
+.news-tab{padding:7px 20px;cursor:pointer;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border-radius:3px;transition:all .15s;color:var(--muted);border:none;background:none}
+.news-tab.active{background:var(--tactical-red);color:#fff}
+
+/* ── COMPETITION CARD ──────────────────────────────────── */
+.comp-card{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;padding:15px;cursor:pointer;transition:border-color .15s,transform .15s;position:relative;overflow:hidden}
+.comp-card:hover{border-color:var(--tactical-red);transform:translateY(-2px)}
+.comp-lvl-tag{position:absolute;top:0;right:0;font-family:var(--fc);font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;color:#fff}
+.comp-name{font-family:var(--fc);font-size:15px;font-weight:700;margin-bottom:5px;padding-right:70px}
+.comp-meta{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:7px;font-size:11px;color:var(--muted)}
+.comp-footer{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--light-grey)}
+
+/* ── ALERT CARD ─────────────────────────────────────────── */
+.alert-card{border-radius:5px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.alert-red{background:rgba(229,57,53,.09);border:1px solid rgba(229,57,53,.25)}
+.alert-gold{background:rgba(212,175,55,.09);border:1px solid rgba(212,175,55,.25)}
+.alert-blue{background:rgba(66,165,245,.09);border:1px solid rgba(66,165,245,.25)}
+
+/* ── PRACTICE ───────────────────────────────────────────── */
+.prac-layout{display:grid;grid-template-columns:1fr 350px;gap:16px;align-items:start}
+.ph-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.ph-tab{padding:5px 11px;border-radius:4px;border:1px solid var(--light-grey);background:none;color:var(--muted);font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.ph-tab.active{background:var(--tactical-red);color:#fff;border-color:var(--tactical-red)}
+.ser-tabs{display:flex;gap:4px}
+.ser-tab{width:32px;height:32px;border-radius:50%;border:1px solid var(--light-grey);background:none;color:var(--muted);font-family:var(--fd);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ser-tab.active{background:var(--tactical-red);color:#fff;border-color:var(--tactical-red)}
+.ser-tab.done{border-color:var(--gold-target);color:var(--gold-target)}
+.ser-tab.trial{border-style:dashed;font-size:11px;font-family:var(--fc)}
+
+/* TIMER */
+.st-badge{display:inline-block;padding:3px 11px;border-radius:3px;font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.st-IDLE{background:rgba(189,189,189,.1);color:var(--silver-badge)}
+.st-PREPARATION{background:rgba(212,175,55,.18);color:var(--gold-target)}
+.st-ATTENTION{background:rgba(229,57,53,.15);color:var(--tactical-red)}
+.st-FIRE{background:rgba(229,57,53,.28);color:var(--tactical-red);animation:fl .5s ease-in-out infinite alternate}
+.st-DUEL_WAIT{background:rgba(212,175,55,.18);color:var(--gold-target)}
+.st-TRIAL_FIRE{background:rgba(66,165,245,.15);color:#64B5F6}
+.st-FINISHED{background:rgba(67,160,71,.15);color:#66BB6A}
+@keyframes fl{from{opacity:.6}to{opacity:1}}
+
+/* SCORE GRID (táctical keyboard feel) */
+.sc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:10px 0}
+.sc-cell{background:var(--light-grey);border:1px solid #3a3a3a;border-radius:4px;padding:9px 4px;text-align:center;font-family:var(--fd);font-size:20px;min-height:40px;cursor:pointer;transition:all .15s;position:relative}
+.sc-cell:hover{border-color:var(--tactical-red);background:#333}
+.sc-cell.entered{border-color:var(--gold-target);color:var(--gold-target);background:rgba(212,175,55,.06)}
+.sc-cell.latest{border-color:var(--tactical-red);color:var(--tactical-red);box-shadow:0 0 6px rgba(229,57,53,.3)}
+.sc-cell .del{position:absolute;top:2px;right:3px;font-size:9px;color:var(--muted);display:none}
+.sc-cell:hover .del{display:block}
+
+/* ANALYSIS CARD */
+.analysis-card{background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.25);border-radius:8px;padding:14px;margin-top:12px}
+
+/* REFEREE ROWS */
+.sh-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--light-grey);transition:background .1s}
+.sh-row:hover{background:rgba(255,255,255,.03)}
+.sc-inp{width:46px;background:var(--light-grey);border:1px solid #3a3a3a;border-radius:4px;padding:4px 5px;color:var(--white-smoke);font-family:var(--fd);font-size:16px;text-align:center;outline:none}
+.sc-inp:focus{border-color:var(--tactical-red)}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-month{font-family:var(--fd);font-size:22px;letter-spacing:2px}
+.cal-nav-btn{background:none;border:1px solid var(--light-grey);color:var(--silver-badge);border-radius:4px;padding:4px 10px;cursor:pointer;font-family:var(--fd);font-size:15px;transition:all .15s}
+.cal-nav-btn:hover{border-color:var(--tactical-red);color:var(--tactical-red)}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px}
+.cal-dh{text-align:center;font-family:var(--fc);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);padding:5px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{min-height:54px;background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:4px;padding:4px 5px;cursor:pointer;transition:border-color .15s;position:relative}
+.cal-day:hover{border-color:var(--silver-badge)}
+.cal-day.other{opacity:.28}
+.cal-day.today{border-color:var(--tactical-red)}
+.cal-day-num{font-family:var(--fd);font-size:15px}
+.cal-day.today .cal-day-num{color:var(--tactical-red)}
+.cal-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
+
+/* PODIUM */
+.podium-row{display:flex;justify-content:center;gap:10px;margin-bottom:18px;align-items:flex-end}
+.pod{display:flex;flex-direction:column;align-items:center;background:var(--dark-grey);border-radius:8px;padding:12px 18px;border:1px solid var(--light-grey)}
+.pod.p1{border-color:var(--gold-target)}.pod.p2{border-color:var(--silver-badge)}.pod.p3{border-color:#CD7F32}
+.pod-n{font-family:var(--fd);font-size:38px;line-height:1}
+.p1 .pod-n{color:var(--gold-target)}.p2 .pod-n{color:var(--silver-badge)}.p3 .pod-n{color:#CD7F32}
+
+/* TV MODE */
+.tv-mode{position:fixed;inset:0;background:#0A0A0A;z-index:300;display:none;flex-direction:column;padding:24px 28px}
+.tv-mode.active{display:flex}
+.tv-row{display:flex;align-items:center;padding:9px 20px;margin-bottom:4px;border-radius:6px;border:1px solid var(--light-grey)}
+.tv-row.t1{background:rgba(212,175,55,.1);border-color:var(--gold-target)}
+.tv-row.t2{background:rgba(189,189,189,.05);border-color:var(--silver-badge)}
+.tv-row.t3{background:rgba(205,127,50,.05);border-color:#CD7F32}
+.tv-pos{font-family:var(--fd);font-size:36px;width:50px;color:var(--muted)}
+.tv-row.t1 .tv-pos{color:var(--gold-target)}.tv-row.t2 .tv-pos{color:var(--silver-badge)}.tv-row.t3 .tv-pos{color:#CD7F32}
+.tv-name{font-family:var(--fd);font-size:28px;flex:1;letter-spacing:1px}
+.tv-score{font-family:var(--fd);font-size:44px;color:var(--gold-target)}
+
+/* CHART */
+.chart-wrap{height:140px;display:flex;align-items:flex-end;justify-content:space-around;gap:3px;position:relative;padding-top:20px}
+.ch-bar-col{display:flex;flex-direction:column;align-items:center;flex:1;height:100%;position:relative}
+.ch-bar{width:100%;border-radius:3px 3px 0 0;transition:height .5s ease;position:relative;cursor:pointer}
+.ch-bar:hover{opacity:.85}
+.ch-val{position:absolute;top:-17px;left:50%;transform:translateX(-50%);font-family:var(--fd);font-size:12px;color:var(--gold-target);white-space:nowrap}
+.ch-lbl{font-size:9px;color:var(--muted);font-family:var(--fc);margin-top:3px;text-align:center}
+
+/* PROFILE */
+.prof-hd{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;padding:20px;display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.prof-av{width:66px;height:66px;border-radius:50%;background:var(--light-grey);border:3px solid var(--tactical-red);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:25px;color:var(--tactical-red);flex-shrink:0;cursor:pointer}
+
+/* SESSION HISTORY */
+.sess-row{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:6px;padding:11px 14px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s}
+.sess-row:hover{border-color:var(--silver-badge)}
+
+/* FORUM */
+.thread-card{background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;padding:13px 15px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.thread-card:hover{border-color:var(--gold-target)}
+.reply-card{background:var(--light-grey);border-radius:5px;padding:10px 12px;margin-bottom:6px}
+
+/* OVERLAY / HAMBURGER */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+.overlay.show{display:block}
+.hamburger{display:none;background:none;border:none;color:var(--white-smoke);cursor:pointer;padding:4px}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}.g2,.g3,.g4{grid-template-columns:1fr}
+  .topbar{padding:0 12px}.content{padding:12px}.hamburger{display:flex}
+  .prac-layout{grid-template-columns:1fr}
+}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--matte-black)}::-webkit-scrollbar-thumb{background:var(--light-grey);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+<div class="login-box">
+  <div class="login-logo">
+    <div class="login-mark">T</div>
+    <div class="login-title">TIRH-O</div>
+    <div class="login-sub">Tiro Deportivo · Almería</div>
+  </div>
+  <div class="l-tabs">
+    <button class="l-tab active" onclick="switchAuth('login')">Iniciar Sesión</button>
+    <button class="l-tab" onclick="switchAuth('register')">Crear Cuenta</button>
+  </div>
+  <div class="l-err" id="l-err"></div>
+
+  <!-- LOGIN -->
+  <div id="lf-login">
+    <div class="fg"><label class="lbl">Email</label><input type="email" id="l-email" placeholder="tu@email.com"></div>
+    <div class="fg"><label class="lbl">Contraseña</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <div class="chk"><input type="checkbox" id="remember" checked><label for="remember">Recordar sesión</label></div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">INICIAR SESIÓN</button>
+    <button class="bio-btn" onclick="bootApp(USERS[0])">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.81 4.47c-.08 0-.16-.02-.23-.06C15.66 3.42 14 3 12.01 3c-1.98 0-3.86.47-5.57 1.41-.24.13-.54.04-.68-.2-.13-.24-.04-.55.2-.68C7.82 2.52 9.86 2 12.01 2c2.13 0 3.99.47 6.03 1.52.25.13.34.43.21.67-.09.18-.26.28-.44.28zM3.5 9.72c-.1 0-.2-.03-.29-.09-.23-.16-.28-.47-.12-.7.99-1.4 2.25-2.5 3.75-3.27C9.98 4.04 14 4.03 17.15 6.07c1.5.89 2.75 2.1 3.74 3.59.16.23.1.54-.13.7-.23.16-.54.1-.7-.13-.9-1.37-2.05-2.49-3.44-3.32-2.75-1.77-6.54-1.77-9.18-.1-1.4.74-2.55 1.76-3.44 3.14-.09.19-.28.27-.5.27zm6.25 12.07c-.13 0-.26-.05-.35-.15-.87-.87-1.34-1.43-2.01-2.64-.69-1.23-1.05-2.73-1.05-4.34 0-2.97 2.54-5.39 5.66-5.39s5.66 2.42 5.66 5.39c0 .28-.22.5-.5.5s-.5-.22-.5-.5c0-2.42-2.09-4.39-4.66-4.39-2.57 0-4.66 1.97-4.66 4.39 0 1.44.32 2.77.93 3.85.64 1.15 1.08 1.64 1.85 2.42.19.2.19.51 0 .71-.11.1-.24.15-.37.15z"/></svg>
+      Usar Huella / Face ID
+    </button>
+    <p style="text-align:center;margin-top:10px;font-size:10px;color:var(--muted)">admin@tirh.es = Admin · carlos@tirh.es = Árbitro · juan@tirh.es = Tirador</p>
+  </div>
+
+  <!-- REGISTRO (mirrors LoginScreen register tab) -->
+  <div id="lf-register" style="display:none">
+    <div class="fg"><label class="lbl">Nombre Completo</label><input type="text" id="r-name" placeholder="Juan García López"></div>
+    <div class="fg"><label class="lbl">DNI (Obligatorio)</label><input type="text" id="r-dni" placeholder="12345678A"></div>
+    <div class="fg"><label class="lbl">Nº Licencia Federal</label><input type="text" id="r-lic" placeholder="A-2341"></div>
+    <div class="fg"><label class="lbl">Fecha caducidad licencia</label><input type="text" id="r-exp" placeholder="15/07/2026"></div>
+    <div class="fg"><label class="lbl">Provincia</label>
+      <select id="r-province" onchange="fillClubs('r-province','r-club')"><option value="">Selecciona provincia…</option></select>
+    </div>
+    <div class="fg"><label class="lbl">Club</label><select id="r-club"><option>Selecciona provincia primero…</option></select></div>
+    <div class="fg"><label class="lbl">Email</label><input type="email" id="r-email" placeholder="tu@email.com"></div>
+    <div class="fg"><label class="lbl">Contraseña</label><input type="password" id="r-pass" placeholder="Mínimo 6 caracteres"></div>
+    <button class="btn btn-primary btn-full" onclick="doRegister()">CREAR CUENTA</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeSB()"></div>
+
+<!-- ══ SIDEBAR ════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo-wrap"><div class="logo-mark">T</div><div><div class="logo-text">TIRH-O</div><div class="logo-sub">Tiro Deportivo</div></div></div>
+  <nav>
+    <div class="nav-sec">Principal</div>
+    <button class="ni active" onclick="go('inicio')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Inicio</button>
+    <button class="ni" onclick="go('practica')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-12.5c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 5.5c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>Sesión de Tiro</button>
+    <button class="ni" onclick="go('calendario')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>Calendario</button>
+    <button class="ni" onclick="go('noticias')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16z"/></svg>Noticias<span class="badge" id="badge-news">3</span></button>
+    <button class="ni" onclick="go('envivo')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3L3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z"/></svg>En Vivo<span class="badge gold">1</span></button>
+    <div class="nav-sec" id="nav-pro" style="display:none">Profesional</div>
+    <button class="ni" id="nav-arb" style="display:none" onclick="go('arbitro')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8zm0-4h8v2H8z"/></svg>Árbitro</button>
+    <button class="ni" id="nav-adm" style="display:none" onclick="go('admin')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Gestión</button>
+    <div class="nav-sec">Comunidad</div>
+    <button class="ni" onclick="go('comunicaciones')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>Comunicaciones</button>
+    <button class="ni" onclick="go('perfil')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>Área Personal</button>
+  </nav>
+  <div class="sb-user" onclick="go('perfil')">
+    <div class="sb-av" id="sb-av">JG</div>
+    <div><div style="font-family:var(--fc);font-size:12px;font-weight:700" id="sb-name">Juan García</div><div style="font-size:10px;color:var(--gold-target);letter-spacing:1px;text-transform:uppercase;font-family:var(--fc)" id="sb-role">Tirador</div></div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ═══════════════════════════════════════════════ -->
+<div class="main" id="main-app" style="display:none">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="hamburger" onclick="toggleSB()"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+    <span class="topbar-title" id="tb-title">INICIO</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center">
+    <div class="live"><span class="ldot"></span>EN VIVO</div>
+    <button class="btn btn-ghost" onclick="doLogout()">Salir</button>
+  </div>
+</header>
+<div class="content">
+
+<!-- INICIO -->
+<div id="page-inicio" class="screen active">
+  <div class="g4" style="margin-bottom:20px" id="home-stats">
+    <div class="stat red"><div class="stat-n" id="hs-best">284</div><div class="stat-l">Mejor Puntuación</div><div class="stat-s">P. Estándar · Feb 2026</div></div>
+    <div class="stat gold"><div class="stat-n" id="hs-comps">12</div><div class="stat-l">Competiciones</div><div class="stat-s">Temporada actual</div></div>
+    <div class="stat silver"><div class="stat-n" id="hs-shots">1.847</div><div class="stat-l">Disparos</div><div class="stat-s">Arma principal</div></div>
+    <div class="stat green"><div class="stat-n">3</div><div class="stat-l">Próximas</div><div class="stat-s">Este mes</div></div>
+  </div>
+  <div id="home-alerts" style="margin-bottom:14px"></div>
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Próximas Competiciones</span><button class="btn btn-ghost" onclick="go('calendario')" style="padding:3px 8px;font-size:10px">Ver todas</button></div>
+      <div class="tw"><table><thead><tr><th>Competición</th><th>Fecha</th><th>Nivel</th><th></th></tr></thead><tbody id="home-comp-tb"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Evolución de Puntuaciones</span></div>
+      <div class="card-body"><div class="chart-wrap" id="score-chart"></div><div style="margin-top:20px"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SESIÓN DE TIRO (mirrors PracticeScreen.kt fully) -->
+<div id="page-practica" class="screen">
+  <!-- Setup bar -->
+  <div style="background:var(--dark-grey);border:1px solid var(--light-grey);border-radius:8px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <div>
+        <div class="lbl" style="margin-bottom:4px">Modo</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" id="mode-train" onclick="setMode(false)" style="background:var(--tactical-red);color:#fff">🏋 Entrenamiento</button>
+          <button class="btn btn-ghost" id="mode-comp" onclick="setMode(true)">🏆 Competición</button>
+        </div>
+      </div>
+      <div style="flex:1;min-width:180px">
+        <div class="lbl" style="margin-bottom:4px">Disciplina</div>
+        <select onchange="selType(this.value)" style="background:var(--light-grey);border:1px solid #3a3a3a;color:var(--white-smoke);font-family:var(--fc);font-size:11px;padding:7px 10px;border-radius:4px;outline:none;width:100%">
+          <option value="STANDARD">Pistola Estándar (3 fases · 5 disp/serie)</option>
+          <option value="CENTER">Fuego Central (2 fases · 5 disp/serie)</option>
+          <option value="NINE">Pistola 9mm (2 fases · 5 disp/serie)</option>
+        </select>
+      </div>
+      <div style="min-width:160px">
+        <div class="lbl" style="margin-bottom:4px">Arma</div>
+        <select id="prac-wpn" style="background:var(--light-grey);border:1px solid #3a3a3a;color:var(--white-smoke);font-family:var(--fc);font-size:11px;padding:7px 10px;border-radius:4px;outline:none;width:100%">
+          <option>Glock 17 (9mm)</option><option>Walther P22 (22 LR)</option>
+        </select>
+      </div>
+      <div style="min-width:90px" id="prac-comp-wrap" style="display:none">
+        <div class="lbl" style="margin-bottom:4px">Competición</div>
+        <select id="prac-comp" style="background:var(--light-grey);border:1px solid #3a3a3a;color:var(--white-smoke);font-family:var(--fc);font-size:11px;padding:7px 10px;border-radius:4px;outline:none;width:100%">
+          <option>Tirada Provincial Almería</option><option>Copa Federación Andalucía</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div>
+        <div class="lbl" style="margin-bottom:4px">Tiempo preparación</div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost" id="prep-30" onclick="setPrep(30)" style="padding:4px 8px;font-size:10px">30"</button>
+          <button class="btn btn-ghost" id="prep-60" onclick="setPrep(60)" style="padding:4px 8px;font-size:10px;border-color:var(--tactical-red);color:var(--tactical-red)">60"</button>
+          <button class="btn btn-ghost" id="prep-90" onclick="setPrep(90)" style="padding:4px 8px;font-size:10px">90"</button>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="prac-vis" onchange="toggleVis(this.checked)" style="width:auto;accent-color:var(--tactical-red)">
+        <span style="font-size:12px;color:var(--silver-badge);font-family:var(--fc)">Diana visual</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="prac-layout" id="prac-main">
+    <div>
+      <div class="ph-tabs" id="ph-tabs"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Serie:</span>
+        <div class="ser-tabs" id="ser-tabs"></div>
+      </div>
+
+      <!-- Timer card -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-body" style="text-align:center;padding:14px">
+          <div id="st-badge" class="st-badge st-IDLE">EN REPOSO</div>
+          <div style="position:relative;display:inline-block;margin:10px 0 6px">
+            <svg style="transform:rotate(-90deg)" width="130" height="130" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="58" fill="none" stroke="var(--light-grey)" stroke-width="7"/>
+              <circle id="t-arc" cx="65" cy="65" r="58" fill="none" stroke="var(--tactical-red)" stroke-width="7" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="0" style="transition:stroke-dashoffset .5s linear,stroke .3s"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="font-family:var(--fd);font-size:42px;line-height:1" id="t-disp">—</div>
+              <div style="font-family:var(--fc);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)" id="t-lbl">TIEMPO</div>
+            </div>
+          </div>
+          <div id="ph-info" style="font-family:var(--fc);font-size:10px;color:var(--muted);margin-bottom:10px"></div>
+          <div id="duel-counter" style="font-family:var(--fd);font-size:20px;color:var(--gold-target);margin-bottom:6px;display:none"></div>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <button class="btn btn-primary" id="btn-start" onclick="startPhase()">▶ INICIAR</button>
+            <button class="btn btn-ghost" id="btn-stop" onclick="stopTimer()" style="display:none">⏹ PARAR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score entry -->
+      <div class="card">
+        <div class="card-hd">
+          <span class="card-title" id="sc-title">Serie 1 — Puntuaciones</span>
+          <span id="ser-tot" style="font-family:var(--fd);font-size:20px;color:var(--gold-target)">0</span>
+        </div>
+        <div class="card-body">
+          <div id="sc-grid" class="sc-grid"></div>
+          <div id="sc-avg" style="font-size:11px;color:var(--muted);text-align:center;font-family:var(--fc);margin-top:4px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--light-grey)">
+            <span style="font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:1px">TOTAL SESIÓN</span>
+            <span id="tot-score" style="font-family:var(--fd);font-size:30px;color:var(--gold-target)">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis -->
+      <div id="analysis-box" class="analysis-card" style="display:none">
+        <div style="font-family:var(--fc);font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold-target);margin-bottom:8px">📊 ANÁLISIS DE SESIÓN</div>
+        <div id="an-feedback" style="font-size:13px;margin-bottom:6px"></div>
+        <div style="font-size:11px;color:var(--muted)">Consistencia: <span id="an-cons" style="color:var(--white-smoke)"></span></div>
+        <div style="font-size:11px;color:var(--muted)">Mejora: <span id="an-impr" style="color:var(--white-smoke)"></span></div>
+        <div id="an-rec" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-ghost" onclick="resetSess()">↺ Reiniciar</button>
+        <button class="btn btn-primary" onclick="saveSess()" style="flex:1">💾 Guardar Sesión</button>
+        <button class="btn btn-gold" onclick="alert('Generando PDF del acta de sesión...')">📄 PDF</button>
+      </div>
+    </div>
+
+    <!-- Diana -->
+    <div id="target-panel" style="display:none">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Diana Interactiva</span><button class="btn btn-ghost" onclick="undoImpact()" style="padding:3px 7px;font-size:10px">↩ Deshacer</button></div>
+        <div class="card-body" style="padding:10px">
+          <canvas id="target-canvas" width="310" height="310" style="border-radius:5px;cursor:crosshair;display:block;width:100%;height:auto"></canvas>
+          <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--fc);letter-spacing:1px">Toca la diana para registrar el impacto</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDARIO -->
+<div id="page-calendario" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <span class="pill p-silver" style="cursor:pointer" onclick="filterC('all')">● Todas</span>
+      <span class="pill" style="cursor:pointer;background:rgba(255,255,255,.06);color:#aaa;border:1px solid #333" onclick="filterC('TRAINING')">Entreno</span>
+      <span class="pill p-orange" style="cursor:pointer" onclick="filterC('PROVINCIAL')">Provincial</span>
+      <span class="pill p-green" style="cursor:pointer" onclick="filterC('AUTONOMIC')">Autonómica</span>
+      <span class="pill p-red" style="cursor:pointer" onclick="filterC('NATIONAL')">Nacional</span>
+    </div>
+    <div id="adm-new-comp" style="display:none"><button class="btn btn-primary" onclick="openM('m-comp')">+ Nueva</button></div>
+  </div>
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="calMove(-1)">◀</button>
+    <span class="cal-month" id="cal-title"></span>
+    <button class="cal-nav-btn" onclick="calMove(1)">▶</button>
+  </div>
+  <div class="cal-header">
+    <div class="cal-dh">LUN</div><div class="cal-dh">MAR</div><div class="cal-dh">MIÉ</div>
+    <div class="cal-dh">JUE</div><div class="cal-dh">VIE</div><div class="cal-dh">SÁB</div><div class="cal-dh">DOM</div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div style="margin-top:16px">
+    <div style="font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Competiciones</div>
+    <div id="comp-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px"></div>
+  </div>
+</div>
+
+<!-- COMUNICACIONES (mirrors NewsScreen with NOTICIAS + FORO tabs) -->
+<div id="page-comunicaciones" class="screen">
+  <div class="news-tabs">
+    <button class="news-tab active" onclick="switchNewsTab('noticias',this)">NOTICIAS</button>
+    <button class="news-tab" onclick="switchNewsTab('foro',this)">FORO</button>
+  </div>
+  <div id="news-panel">
+    <div id="news-list"></div>
+  </div>
+  <div id="foro-panel" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btn-primary" onclick="openM('m-thread')">+ Nuevo Hilo</button></div>
+    <div id="forum-list"></div>
+  </div>
+</div>
+
+<!-- EN VIVO -->
+<div id="page-envivo" class="screen">
+  <div style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div><div class="live" style="margin-bottom:3px"><span class="ldot"></span>COMPETICIÓN EN DIRECTO</div><div style="font-size:11px;color:var(--muted)">Tirada Provincial Almería · Pistola Estándar</div></div>
+    <button class="btn btn-primary" onclick="openTV()">📺 Modo TV / Proyector</button>
+  </div>
+  <div class="podium-row">
+    <div class="pod p2"><div class="pod-n">2</div><div style="font-family:var(--fc);font-weight:700;margin-top:5px;font-size:12px">M. Fernández</div><div style="font-family:var(--fd);font-size:22px;color:var(--silver-badge)">278</div><small style="color:var(--muted);font-size:10px">Damas</small></div>
+    <div class="pod p1"><div class="pod-n">1</div><div style="font-family:var(--fc);font-weight:700;margin-top:5px;font-size:12px">J. García</div><div style="font-family:var(--fd);font-size:22px;color:var(--gold-target)">284</div><small style="color:var(--muted);font-size:10px">Sénior</small></div>
+    <div class="pod p3"><div class="pod-n">3</div><div style="font-family:var(--fc);font-weight:700;margin-top:5px;font-size:12px">A. López</div><div style="font-family:var(--fd);font-size:22px;color:#CD7F32">265</div><small style="color:var(--muted);font-size:10px">Veterano</small></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Clasificación General</span>
+      <select onchange="filterLive(this.value)" style="background:var(--light-grey);border:1px solid #3a3a3a;color:var(--white-smoke);font-family:var(--fc);font-size:10px;padding:3px 7px;border-radius:3px;outline:none">
+        <option value="">Todas</option><option>Sénior</option><option>Veterano</option><option>Damas</option>
+      </select>
+    </div>
+    <div class="tw"><table><thead><tr><th>#</th><th>Tirador</th><th>Categoría</th><th>Club</th><th>Puntuación</th></tr></thead><tbody id="live-table"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ÁRBITRO -->
+<div id="page-arbitro" class="screen">
+  <div class="g2" style="margin-bottom:12px">
+    <div class="fg" style="margin:0"><label class="lbl">Competición activa</label><select id="ref-comp" onchange="renderReferee()"><option>Tirada Provincial Almería</option><option>Copa Federación Andalucía</option></select></div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div class="fg" style="margin:0;flex:1"><label class="lbl">Categoría</label>
+        <select id="ref-cat" onchange="renderReferee()"><option value="">Todas</option><option>Sénior</option><option>Veterano</option><option>Damas</option><option>Junior</option></select>
+      </div>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer;margin-bottom:2px">
+        <input type="checkbox" id="ref-sort" onchange="renderReferee()" style="width:auto;accent-color:var(--tactical-red)">
+        <span style="font-size:11px;color:var(--silver-badge);font-family:var(--fc)">Por puntaje</span>
+      </label>
+    </div>
+  </div>
+  <div id="ref-ph-tabs" class="ph-tabs" style="margin-bottom:12px"></div>
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title" id="ref-ph-title">Fase: Precisión (150")</span>
+      <div style="display:flex;gap:6px">
+        <span id="ref-sync" style="display:none;font-family:var(--fc);font-size:10px;color:var(--tactical-red);align-items:center;gap:3px">☁ Sin sync</span>
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px" onclick="renderReferee()">↺</button>
+        <button class="btn btn-ghost" style="padding:4px 8px;font-size:10px" onclick="openM('m-manual')">+ Manual</button>
+        <button class="btn btn-gold" style="padding:4px 8px;font-size:10px" onclick="alert('Compartiendo imagen del podio...')">🏆 Podio</button>
+      </div>
+    </div>
+    <div id="ref-shooters"></div>
+    <div style="padding:10px 14px;border-top:1px solid var(--light-grey);display:flex;justify-content:flex-end;gap:6px">
+      <button class="btn btn-ghost">Vista PDF</button>
+      <button class="btn btn-gold" onclick="alert('Acta enviada a la federación ✓')">📨 Enviar Acta</button>
+    </div>
+  </div>
+</div>
+
+<!-- GESTIÓN (OwnerAdminScreen) -->
+<div id="page-admin" class="screen">
+  <div class="adm-tabs">
+    <button class="adm-tab active" onclick="admTab('usuarios',this)">Usuarios</button>
+    <button class="adm-tab" onclick="admTab('competiciones',this)">Competiciones</button>
+    <button class="adm-tab" onclick="admTab('sesiones',this)">Sesiones</button>
+    <button class="adm-tab" onclick="admTab('comunicados',this)">Comunicados</button>
+    <button class="adm-tab" onclick="admTab('foro-adm',this)">Foro</button>
+    <button class="adm-tab" onclick="admTab('config',this)">Config</button>
+  </div>
+
+  <div id="adm-usuarios" class="adm-panel active">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Usuarios del Sistema</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-green" onclick="exportCSV()" style="padding:4px 9px;font-size:10px">📊 Excel</button>
+          <button class="btn btn-primary" style="padding:4px 9px;font-size:10px" onclick="openM('m-newuser')">+ Nuevo</button>
+        </div>
+      </div>
+      <div class="tw"><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Categoría</th><th>Licencia</th><th>Caducidad</th><th>Provincia</th><th></th></tr></thead><tbody id="adm-u-tb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="adm-competiciones" class="adm-panel">
+    <button class="btn btn-primary" style="margin-bottom:10px" onclick="openM('m-comp')">+ Nueva Competición</button>
+    <div id="adm-comp-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px"></div>
+  </div>
+
+  <div id="adm-sesiones" class="adm-panel">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Sesiones Registradas</span></div>
+      <div class="tw"><table><thead><tr><th>Tirador</th><th>Disciplina</th><th>Puntuación</th><th>Categoría</th><th>Club</th><th>Tipo</th><th>Fecha</th></tr></thead><tbody id="adm-sess-tb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="adm-comunicados" class="adm-panel">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-hd"><span class="card-title">Nuevo Comunicado</span></div>
+      <div class="card-body">
+        <div class="fg"><label class="lbl">Asunto</label><input type="text" placeholder="Asunto del comunicado"></div>
+        <div class="fg"><label class="lbl">Contenido</label><textarea placeholder="Escribe el comunicado…"></textarea></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost">Borrador</button>
+          <button class="btn btn-primary" onclick="alert('Comunicado publicado y enviado a todos los tiradores ✓')">Publicar y Enviar</button>
+        </div>
+      </div>
+    </div>
+    <div id="adm-news-list"></div>
+  </div>
+
+  <div id="adm-foro-adm" class="adm-panel">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Hilos del Foro</span></div>
+      <div class="tw"><table><thead><tr><th>Hilo</th><th>Autor</th><th>Respuestas</th><th>Fecha</th><th></th></tr></thead><tbody id="adm-forum-tb"></tbody></table></div>
+    </div>
+  </div>
+
+  <div id="adm-config" class="adm-panel">
+    <div class="g2">
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Email Federación</span></div>
+        <div class="card-body">
+          <div class="fg"><label class="lbl">Email para envío de actas</label><input type="email" id="fed-email" value="andalucia@rfedeto.com"></div>
+          <button class="btn btn-primary" onclick="alert('Email guardado en Firestore ✓')">Guardar</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-title">Estadísticas del Sistema</span></div>
+        <div class="card-body"><table><tbody>
+          <tr><td style="color:var(--muted)">Usuarios</td><td style="text-align:right"><b style="font-family:var(--fd);font-size:18px">5</b></td></tr>
+          <tr><td style="color:var(--muted)">Competiciones</td><td style="text-align:right"><b style="font-family:var(--fd);font-size:18px">4</b></td></tr>
+          <tr><td style="color:var(--muted)">Sesiones</td><td style="text-align:right"><b style="font-family:var(--fd);font-size:18px">37</b></td></tr>
+          <tr><td style="color:var(--muted)">Comunicados</td><td style="text-align:right"><b style="font-family:var(--fd);font-size:18px">3</b></td></tr>
+        </tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ÁREA PERSONAL (ProfileScreen) -->
+<div id="page-perfil" class="screen">
+  <div class="prof-hd">
+    <div class="prof-av" id="prof-av" onclick="openM('m-photo')" title="Cambiar foto">JG</div>
+    <div style="flex:1">
+      <div style="font-family:var(--fd);font-size:28px;letter-spacing:1px" id="prof-name">Juan García</div>
+      <div style="font-family:var(--fc);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-target);margin-top:2px" id="prof-role">Tirador · Sénior</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:7px;font-size:11px;color:var(--muted)" id="prof-meta"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
+      <div style="display:flex;gap:5px">
+        <button class="btn btn-ghost" onclick="openM('m-qr')" style="padding:4px 8px;font-size:10px">🔲 QR</button>
+        <button class="btn btn-ghost" id="btn-edit" onclick="toggleEdit()" style="padding:4px 8px;font-size:10px">✏ Editar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertas del perfil (mirrors ProfileScreen alert logic) -->
+  <div id="prof-alerts" style="margin-bottom:14px"></div>
+
+  <!-- Datos faltantes -->
+  <div id="missing-data-alert" style="display:none;margin-bottom:14px" class="alert-card alert-blue">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#64B5F6"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    <div style="font-size:12px"><b>Actualización necesaria</b> — Por favor completa: <span id="missing-fields" style="color:#64B5F6"></span></div>
+  </div>
+
+  <!-- Edit form (inline, like the app) -->
+  <div id="edit-form" style="display:none" class="card" style="margin-bottom:14px">
+    <div class="card-hd"><span class="card-title">Editar Perfil</span><button class="btn btn-primary" onclick="saveProfile()" style="padding:4px 9px;font-size:10px">💾 Guardar</button></div>
+    <div class="card-body">
+      <div class="g2">
+        <div class="fg"><label class="lbl">Nombre Completo</label><input type="text" id="ep-name"></div>
+        <div class="fg"><label class="lbl">DNI</label><input type="text" id="ep-dni" placeholder="12345678A"></div>
+        <div class="fg"><label class="lbl">Nº Licencia</label><input type="text" id="ep-lic"></div>
+        <div class="fg"><label class="lbl">Caducidad Licencia</label><input type="text" id="ep-exp" placeholder="15/07/2026"></div>
+        <div class="fg"><label class="lbl">Teléfono</label><input type="text" id="ep-phone" placeholder="+34 600 000 000"></div>
+        <div class="fg"><label class="lbl">F. Nacimiento</label><input type="text" id="ep-birth" placeholder="01/01/1985"></div>
+        <div class="fg"><label class="lbl">Categoría</label><select id="ep-cat"><option>Sénior</option><option>Veterano</option><option>Damas</option><option>Junior</option><option>Sub-18</option></select></div>
+        <div class="fg"><label class="lbl">Provincia</label><select id="ep-province" onchange="fillClubs('ep-province','ep-club')"></select></div>
+        <div class="fg" style="grid-column:span 2"><label class="lbl">Club (filtra por nombre)</label><input type="text" id="ep-club-search" placeholder="Buscar club…" oninput="filterClubList(this.value)"><select id="ep-club" size="4" style="margin-top:4px;height:80px"></select></div>
+        <div class="fg"><label class="lbl">Arma / Modelo principal</label><input type="text" id="ep-weapon" placeholder="Glock 17"></div>
+        <div class="fg"><label class="lbl">Guía de arma</label><input type="text" id="ep-guide" placeholder="G-12345"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Estadísticas Rápidas</span></div>
+      <div class="card-body"><table><tbody id="prof-stats-tb"></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="card-title">Mis Armas</span><button class="btn btn-ghost" style="padding:3px 7px;font-size:10px" onclick="openM('m-weapon')">+ Añadir</button></div>
+      <div class="card-body" id="prof-weapons-list" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+  </div>
+
+  <!-- Historial sesiones -->
+  <div class="card">
+    <div class="card-hd"><span class="card-title">Historial de Sesiones</span>
+      <div style="display:flex;gap:5px;align-items:center">
+        <select id="sess-year-filter" onchange="renderSessions()" style="background:var(--light-grey);border:1px solid #3a3a3a;color:var(--white-smoke);font-family:var(--fc);font-size:10px;padding:3px 7px;border-radius:3px;outline:none">
+          <option value="">Todos los años</option><option>2026</option><option>2025</option>
+        </select>
+      </div>
+    </div>
+    <div id="sess-list" class="card-body"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ TV MODE ═════════════════════════════════════════════ -->
+<div class="tv-mode" id="tv-mode">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px">
+    <div>
+      <div style="font-family:var(--fd);font-size:38px;letter-spacing:4px">TIRH-O · EN VIVO</div>
+      <div style="font-size:12px;color:var(--muted);font-family:var(--fc);letter-spacing:2px">TIRADA PROVINCIAL ALMERÍA · PISTOLA ESTÁNDAR</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div style="font-family:var(--fd);font-size:24px;color:var(--gold-target);letter-spacing:3px" id="tv-cat">SÉNIOR</div>
+      <div class="live"><span class="ldot"></span>EN DIRECTO</div>
+      <button class="btn btn-ghost" onclick="closeTV()" style="font-size:10px;margin-top:4px">✕ Salir</button>
+    </div>
+  </div>
+  <div id="tv-list" style="flex:1"></div>
+  <div style="text-align:center;margin-top:10px;font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:2px">APP TIRH-O · CLUB DE TIRO ALMERÍA · <span id="tv-clock"></span></div>
+</div>
+
+<!-- ══ MODALS ══════════════════════════════════════════════ -->
+<div class="mbd" id="m-comp"><div class="modal">
+  <button class="modal-close" onclick="closeM('m-comp')">✕</button>
+  <div class="modal-title">Nueva Competición</div>
+  <div class="fg"><label class="lbl">Nombre</label><input type="text" placeholder="Nombre de la competición"></div>
+  <div class="g2"><div class="fg"><label class="lbl">Fecha</label><input type="text" placeholder="22/05/2026"></div><div class="fg"><label class="lbl">Hora</label><input type="text" placeholder="10:00"></div></div>
+  <div class="fg"><label class="lbl">Disciplina</label><select><option>Pistola Estándar</option><option>Fuego Central</option><option>Pistola 9mm</option></select></div>
+  <div class="fg"><label class="lbl">Nivel</label><select><option>Entrenamiento</option><option>Territorial</option><option>Provincial</option><option>Autonómica</option><option>Nacional</option><option>Internacional</option></select></div>
+  <div class="fg"><label class="lbl">Ubicación</label><input type="text" placeholder="Campo de Tiro Almería"></div>
+  <div class="fg"><label class="lbl">Descripción / Normas</label><textarea></textarea></div>
+  <div class="modal-actions"><button class="btn btn-ghost" onclick="closeM('m-comp')">Cancelar</button><button class="btn btn-primary" onclick="alert('Guardado ✓');closeM('m-comp')">Guardar</button></div>
+</div></div>
+
+<div class="mbd" id="m-thread"><div class="modal">
+  <button class="modal-close" onclick="closeM('m-thread')">✕</button>
+  <div class="modal-title">Nuevo Hilo</div>
+  <div class="fg"><label class="lbl">Título</label><input type="text" id="th-title" placeholder="Título del hilo"></div>
+  <div class="fg"><label class="lbl">Contenido</label><textarea id="th-body" placeholder="Escribe tu mensaje…" style="min-height:90px"></textarea></div>
+  <div class="fg"><label class="lbl">Enlace (opcional)</label><input type="text" placeholder="https://…"></div>
+  <div class="modal-actions"><button class="btn btn-ghost" onclick="closeM('m-thread')">Cancelar</button><button class="btn btn-primary" onclick="postThread()">Publicar</button></div>
+</div></div>
+
+<div class="mbd" id="m-thread-view"><div class="modal" style="width:580px">
+  <button class="modal-close" onclick="closeM('m-thread-view')">✕</button>
+  <div id="tv-content"></div>
+  <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--light-grey)">
+    <div class="fg"><label class="lbl">Tu respuesta</label><textarea id="reply-body" placeholder="Escribe tu respuesta…" style="min-height:60px"></textarea></div>
+    <button class="btn btn-primary" onclick="postReply()">📤 Responder</button>
+  </div>
+</div></div>
+
+<div class="mbd" id="m-weapon"><div class="modal">
+  <button class="modal-close" onclick="closeM('m-weapon')">✕</button>
+  <div class="modal-title">Nueva Arma</div>
+  <div class="fg"><label class="lbl">Alias</label><input type="text" id="w-alias" placeholder="Mi 9mm, Carabina…"></div>
+  <div class="g2">
+    <div class="fg"><label class="lbl">Marca</label><input type="text" id="w-brand" placeholder="Glock, Walther…"></div>
+    <div class="fg"><label class="lbl">Modelo</label><input type="text" id="w-model" placeholder="17, P22…"></div>
+    <div class="fg"><label class="lbl">Calibre</label><input type="text" id="w-cal" placeholder="9mm Parabellum"></div>
+    <div class="fg"><label class="lbl">Nº Guía</label><input type="text" id="w-guide" placeholder="G-12345"></div>
+  </div>
+  <div class="fg"><label class="lbl">Intervalo mantenimiento (disparos)</label><input type="number" id="w-interval" value="1000"></div>
+  <div class="modal-actions"><button class="btn btn-ghost" onclick="closeM('m-weapon')">Cancelar</button><button class="btn btn-primary" onclick="addWeapon()">Guardar Arma</button></div>
+</div></div>
+
+<div class="mbd" id="m-qr"><div class="modal" style="text-align:center;width:360px">
+  <button class="modal-close" onclick="closeM('m-qr')">✕</button>
+  <div class="modal-title">Mi Carnet Digital</div>
+  <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Muéstralo al árbitro para verificación de identidad</p>
+  <div style="display:flex;justify-content:center;margin-bottom:12px"><canvas id="qr-canvas" width="200" height="200" style="image-rendering:pixelated;border:5px solid #fff;border-radius:3px;background:#fff"></canvas></div>
+  <div style="font-family:var(--fc);font-size:13px;font-weight:700;margin-bottom:3px" id="qr-name"></div>
+  <div style="font-size:11px;color:var(--muted)" id="qr-lic"></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:2px" id="qr-cat"></div>
+</div></div>
+
+<div class="mbd" id="m-photo"><div class="modal" style="width:340px">
+  <button class="modal-close" onclick="closeM('m-photo')">✕</button>
+  <div class="modal-title">Actualizar foto</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn btn-ghost btn-full" onclick="alert('Abriendo cámara…');closeM('m-photo')">📷 Usar Cámara</button>
+    <button class="btn btn-ghost btn-full" onclick="alert('Abriendo galería…');closeM('m-photo')">🖼 Elegir de Galería</button>
+    <button class="btn btn-ghost btn-full" onclick="alert('Abriendo licencia…');closeM('m-photo')">📄 Foto Licencia</button>
+  </div>
+</div></div>
+
+<div class="mbd" id="m-manual"><div class="modal" style="width:420px">
+  <button class="modal-close" onclick="closeM('m-manual')">✕</button>
+  <div class="modal-title">Inscripción Manual</div>
+  <div class="fg"><label class="lbl">Nombre completo</label><input type="text" id="manual-name" placeholder="Nombre del tirador"></div>
+  <div class="fg"><label class="lbl">Categoría</label><select id="manual-cat"><option>Sénior</option><option>Veterano</option><option>Damas</option><option>Junior</option></select></div>
+  <div class="modal-actions"><button class="btn btn-ghost" onclick="closeM('m-manual')">Cancelar</button><button class="btn btn-primary" onclick="addManualShooter()">Inscribir</button></div>
+</div></div>
+
+<div class="mbd" id="m-newuser"><div class="modal">
+  <button class="modal-close" onclick="closeM('m-newuser')">✕</button>
+  <div class="modal-title">Nuevo Usuario</div>
+  <div class="g2">
+    <div class="fg"><label class="lbl">Nombre</label><input type="text" id="nu-name" placeholder="Juan García"></div>
+    <div class="fg"><label class="lbl">Email</label><input type="email" id="nu-email" placeholder="juan@email.es"></div>
+    <div class="fg"><label class="lbl">DNI</label><input type="text" id="nu-dni" placeholder="12345678A"></div>
+    <div class="fg"><label class="lbl">Licencia</label><input type="text" id="nu-lic" placeholder="A-2341"></div>
+    <div class="fg"><label class="lbl">Teléfono</label><input type="text" id="nu-phone" placeholder="+34 600 000 000"></div>
+    <div class="fg"><label class="lbl">Rol</label><select id="nu-role"><option value="SHOOTER">Tirador</option><option value="REFEREE">Árbitro</option><option value="ADMIN">Admin</option></select></div>
+  </div>
+  <div class="modal-actions"><button class="btn btn-ghost" onclick="closeM('m-newuser')">Cancelar</button><button class="btn btn-primary" onclick="createUser()">Crear Usuario</button></div>
+</div></div>
+
+<div class="mbd" id="m-sess-detail"><div class="modal" style="width:540px">
+  <button class="modal-close" onclick="closeM('m-sess-detail')">✕</button>
+  <div id="sess-detail-content"></div>
+</div></div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// AUDIO ENGINE  (mirrors PracticeScreen.kt sound logic)
+// beep_preparacion · voz_atencion · beep_ya
+// ════════════════════════════════════════════════════════════
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _actx = null;
+function getACtx(){ if(!_actx) _actx = new AudioCtx(); if(_actx.state==='suspended') _actx.resume(); return _actx; }
+
+// beep_preparacion — 3 slow beeps at 440Hz (preparation signal)
+function playBeepPreparacion(){
+  try{
+    const ctx=getACtx();
+    [0, 0.4, 0.8].forEach(t=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=440; o.type='sine';
+      g.gain.setValueAtTime(0, ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(0.45, ctx.currentTime+t+0.02);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime+t+0.15);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.2);
+    });
+  }catch(e){}
+}
+
+// voz_atencion — descending two-tone whistle 660→550Hz (attention signal)
+function playVozAtencion(){
+  try{
+    const ctx=getACtx();
+    [[660,0],[550,0.28]].forEach(([freq,t])=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=freq; o.type='sine';
+      g.gain.setValueAtTime(0, ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(0.5, ctx.currentTime+t+0.02);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime+t+0.24);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.32);
+    });
+  }catch(e){}
+}
+
+// beep_ya — sharp single high beep 880Hz (FUEGO / ALTO signal)
+function playBeepYa(){
+  try{
+    const ctx=getACtx();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value=880; o.type='square';
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.35, ctx.currentTime+0.01);
+    g.gain.linearRampToValueAtTime(0, ctx.currentTime+0.1);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+0.15);
+  }catch(e){}
+}
+
+// Play sound on state change (LaunchedEffect(uiState.shootingState) in PracticeScreen.kt)
+let _lastSoundState = null;
+function playStateSound(state){
+  if(state===_lastSoundState) return;
+  _lastSoundState = state;
+  if(state==='PREPARATION') playBeepPreparacion();
+  else if(state==='ATTENTION') playVozAtencion();
+  else if(state==='FIRE' || state==='FINISHED') playBeepYa();
+}
+
+
+// ════════════════════════════════════════════════════════════
+// PERMISSION HELPERS  (mirrors Firestore security rules exactly)
+// hasPrivilege()  → OWNER | ADMIN
+// isReferee()     → OWNER | ADMIN | REFEREE
+// isOwner(uid)    → own document
+// ════════════════════════════════════════════════════════════
+function hasPrivilege(){ return CU && (CU.role==='OWNER'||CU.role==='ADMIN'); }
+function isReferee(){ return CU && (CU.role==='OWNER'||CU.role==='ADMIN'||CU.role==='REFEREE'); }
+function isOwner(uid){ return CU && CU.uid===uid; }
+
+// Rule: sessions write → isReferee() && score >= 0
+function canWriteSession(){ return isReferee(); }
+// Rule: competitions create/delete → hasPrivilege()
+function canManageCompetitions(){ return hasPrivilege(); }
+// Rule: competitions update → hasPrivilege() OR only registeredUserIds/manualRegistrations changed
+function canUpdateCompetition(){ return hasPrivilege() || CU!=null; }
+// Rule: users update → hasPrivilege() OR own doc keeping same role
+function canEditUser(uid){ return hasPrivilege() || isOwner(uid); }
+// Rule: forum delete → author OR hasPrivilege()
+function canDeleteThread(authorId){ return hasPrivilege() || isOwner(authorId); }
+// Rule: communications write → hasPrivilege()
+function canWriteCommunication(){ return hasPrivilege(); }
+// Rule: weapons read/write → isOwner OR hasPrivilege()
+function canManageWeapons(uid){ return isOwner(uid) || hasPrivilege(); }
+
+// ════════════════════════════════════════════════════════════
+// DATOS  (exact models from Kotlin domain)
+// ════════════════════════════════════════════════════════════
+
+const PROV_CLUBS = {
+  'Almería':['Delegación Almería','CLUB DE TIRO GADOR-LOS MOLINOS','CLUB DE TIRO ORO BLANCO FINES','CLUB DE TIRO OLIMPICO VIRGITANO','CLUB DE TIRO LA CAÑADA','CLUB DE TIRO OLIMPICO 23','CLUB DE TIRO CAMPO DE NIJAR','C.D. ASOC. DE CLUBES DE TIRO OLIMPICO DE ALMERIA','CLUB DE TIRO OLIMPICO INDALO','CLUB DE TIRO OLIMPICO HUERCALENSE','CLUB DE TIRO MURGI','C.D. DE TIRO PRACTICO DILIGENTIA, VIS, CELERITAS, LUCIUS AEMILIUS DAFNUS','C.D. 32 ALMERIA','C.D. LOS TRANCES'],
+  'Cádiz':['Delegación Cádiz','CLUB DEPORTIVO DE TIRO OLIMPICO ISLA DE LEON','C.D. TEAM JEREZ','CLUB DE TIRO DEPORTIVO BAHIA DE CADIZ','C.D. FLOTA ROTA','C.D. AMIGOS DEL TIRO'],
+  'Córdoba':['Delegación Córdoba','C.D. CORDOBES DE TIRO OLIMPICO','CLUB DE TIRO OLIMPICO PONTANES','CLUB DE TIRO DEPORTIVO MEZQUITA','C.D. DE TIRO GRAN CAPITAN','CLUB DE TIRO DEPORTIVO LOS ALCAZARES','SIERRA MORENA CLUB DE TIRO DEPORTIVO','C.D. DE TIRO SELFA','C.D. CERRO VIENTO','C.D. DE TIRO OLIMPICO ANZUR','C.D. DE TIRO OLIMPICO EL MEMBRILLO'],
+  'Granada':['Delegación Granada','C.D. A.D. TIRADORES ANDALUCES','C.D. SDAD. DE TIRO PURULLENA','C.D. DE TIRO AL PLATO DE MONTEFRIO','ALIJARES CLUB DE TIRO DEPORTIVO','C.D. EL SOMBRERO CLUB DE TIRO','C.D. TIRO OLIMPICO GRANADINO','C.D. ASOC. DE TIRO SIERRA NEVADA','CLUB DE TIRO PUERTA REAL','C.D. DE TIRO LAS ENCEBRAS','C.D. IPSC-GRANADA','CLUB DE TIRO DEPORTIVO EL TORREON','C.D. ILIBERIS','C.D. DE TIRO CERRO DE LAS PAZAS','C.D. DE TIRO OLIMPICO EUROGRANADA','C.D. TIRO OLIMPICO SIMBA','C.D. TIRO OLIMPICO OMEGA','CLUB DE TIRO OLIMPICO ALMUÑECAR - 07'],
+  'Huelva':['Delegación Huelva','C.D. TIRO AL PLATO LA RIBERA','CLUB DE TIRO DEPORTIVO HUELVA','C.D. DE TIRO ALJARAQUE'],
+  'Jaén':['Delegación Jaén','C.D. LOS LLANOS CLUB DE TIRO','CLUB DE TIRO DEL OJANCO'],
+  'Málaga':['Delegación Málaga','CLUB DE TIRO MALAGUES','CLUB DE TIRO LA MADROÑA','CLUB DE TIRO JABALI','CLUB MALAGA DE TIRO OLIMPICO','C.D. BENALMADENA DE TIRO OLIMPICO','C.D. DE TIRO SAN LUIS','C.D. DE TIRO EL FUSIL','CLUB DE TIRO AXARQUIA','C.D. MALAKA PRACTICAL SHOOTING CLUB','C.D. DESERT EAGLE & WALTHER CLUB DE TIRO','CLUB DE TIRO DEPORTIVO LINCE','C.D. DE TIRO 9.45','C.D. TIRO OLIMPICO POLVORILLA','C.D. DE TIRO COSTA DEL SOL','C.D. LA GUANFRIA','C.D. DE TIRO BENCH - REST ANDALUCIA','C.D. DE TIRO CARABINA OLIMPICA MALAGA','C.D. DE TIRO BAHIA MALAGA'],
+  'Sevilla':['Delegación Sevilla','C.D. DE CAZA LAS ARENAS','C.D. TIRO OLIMPLICO OLIVARES','CLUB DE TIRO SAN FRANCISCO','C.D. DE DILIGENTIA, VIS, CELERITAS (DVC) SEVILLA','CLUB DE TIRO CALIBRE 45','CLUB DE TIRO HISPALIS','CLUB DE TIRO ALCALA','CLUB DE TIRO OLIMPICO PARABELLUM SEVILLA','CLUB DE TIRO DIVINA PASTORA','CLUB DE TIRO TOMARES','C.D. DE TIRO LOS PALACIOS Y VILLAFRANCA','CLUB DE TIRO CON ARMAS DE AVANCARGA E HISTORICAS TERCIOS MORADOS DE SEVILLA','C.D. DE TIRO FOMENTO DE TACTICAS PERSONALIZADAS','C.D. DE TIRO DIEZ PUNTO NUEVE']
+};
+
+// User model (User.kt)
+const USERS = [
+  {uid:'u1',name:'Juan García',displayName:'Juan García',email:'juan@tirh.es',role:'SHOOTER',category:'Sénior',license:'A-2341',licenseExpiryDate:new Date('2026-07-15').getTime(),dni:'12345678A',province:'Almería',club:'CLUB DE TIRO OLIMPICO HUERCALENSE',phoneNumber:'+34 600 111 222',birthDate:new Date('1985-03-15').getTime(),weaponModel:'Glock 17',expiry:'15 Jul 2026'},
+  {uid:'u2',name:'María Fernández',displayName:'María Fernández',email:'maria@tirh.es',role:'SHOOTER',category:'Damas',license:'A-2342',licenseExpiryDate:new Date('2026-09-30').getTime(),dni:'87654321B',province:'Almería',club:'Delegación Almería',phoneNumber:'+34 600 333 444',birthDate:null,weaponModel:'Walther P22',expiry:'30 Sep 2026'},
+  {uid:'u3',name:'Antonio López',displayName:'Antonio López',email:'antonio@tirh.es',role:'SHOOTER',category:'Veterano',license:'A-2343',licenseExpiryDate:new Date('2027-02-28').getTime(),dni:'11223344C',province:'Almería',club:'CLUB DE TIRO GADOR-LOS MOLINOS',phoneNumber:'',birthDate:new Date('1965-06-20').getTime(),weaponModel:'',expiry:'28 Feb 2027'},
+  {uid:'u4',name:'Carlos Ruiz',displayName:'Carlos Ruiz',email:'carlos@tirh.es',role:'REFEREE',category:'Sénior',license:'A-1001',licenseExpiryDate:new Date('2027-06-30').getTime(),dni:'55667788D',province:'Almería',club:'Delegación Almería',phoneNumber:'+34 600 555 666',birthDate:null,weaponModel:'',expiry:'30 Jun 2027'},
+  {uid:'u5',name:'Admin TIRH',displayName:'Admin TIRH',email:'admin@tirh.es',role:'ADMIN',category:'—',license:'—',licenseExpiryDate:null,dni:'—',province:'Almería',club:'Delegación Almería',phoneNumber:'',birthDate:null,weaponModel:'',expiry:'—'},
+];
+
+// Competition.kt model
+const COMPS = [
+  {id:'c1',name:'Tirada Provincial Almería',date:new Date(2026,4,22).getTime(),dateStr:'22 May 2026',level:'PROVINCIAL',discipline:'Pistola Estándar',location:'Campo de Tiro Almería',description:'Tirada provincial clasificatoria para el campeonato autonómico.',registered:['u1','u2'],manualRegistrations:[],time:'10:00',rules:''},
+  {id:'c2',name:'Copa Federación Andalucía',date:new Date(2026,5,8).getTime(),dateStr:'8 Jun 2026',level:'AUTONOMIC',discipline:'Fuego Central',location:'Polígono de Tiro Sevilla',description:'Copa autonómica de Andalucía. Clasificatoria para el nacional.',registered:['u1'],manualRegistrations:[],time:'09:30',rules:''},
+  {id:'c3',name:'Campeonato Nacional',date:new Date(2026,5,20).getTime(),dateStr:'20 Jun 2026',level:'NATIONAL',discipline:'Pistola 9mm',location:'RFEDETO Madrid',description:'Campeonato Nacional de Tiro Deportivo con Pistola.',registered:[],manualRegistrations:[],time:'08:00',rules:''},
+  {id:'c4',name:'Entrenamiento Mensual',date:new Date(2026,4,10).getTime(),dateStr:'10 May 2026',level:'TRAINING',discipline:'Pistola Estándar',location:'Campo de Tiro Almería',description:'Sesión mensual del club.',registered:['u1','u2','u3'],manualRegistrations:[],time:'10:00',rules:''},
+];
+
+// Communication.kt
+const NEWS = [
+  {id:'n1',subject:'Actualización reglamento provincial 2026',body:'La Federación Andaluza ha publicado las nuevas normas para la temporada 2026. Todos los árbitros deberán completar el curso de actualización antes del 1 de junio.',senderName:'Admin TIRH',timestamp:Date.now()-86400000*2,isPinned:true,recipientCount:5},
+  {id:'n2',subject:'Resultados Copa Febrero — Clasificación publicada',body:'Ya están disponibles los resultados oficiales de la Copa de Febrero. Enhorabuena a todos los participantes y especialmente al ganador Juan García con 284 puntos.',senderName:'Admin TIRH',timestamp:Date.now()-86400000*5,isPinned:false,recipientCount:5},
+  {id:'n3',subject:'Mantenimiento del campo — Sábado 18 mayo',body:'El campo permanecerá cerrado el sábado 18 de mayo por labores de mantenimiento. Las reservas serán reasignadas automáticamente.',senderName:'Admin TIRH',timestamp:Date.now()-86400000*7,isPinned:false,recipientCount:5},
+];
+
+// ForumThread.kt + ForumReply.kt
+let THREADS = [
+  {id:'t1',title:'Recomendaciones de munición para Pistola Estándar',content:'¿Qué munición recomendáis para Pistola Estándar? Busco algo que dé buenos grupos a 25m. Actualmente uso Fiocchi pero no estoy del todo satisfecho.',authorName:'Juan García',authorId:'u1',replyCount:2,isPinned:false,timestamp:Date.now()-3600000*5,replies:[
+    {id:'r1',content:'Yo uso RWS de 40gr con muy buenos resultados. También Eley es muy buena opción.',authorName:'María Fernández',timestamp:Date.now()-3600000*3},
+    {id:'r2',content:'Fiocchi y Lapua también son muy buenas. Prueba la SK Standard Plus.',authorName:'Antonio López',timestamp:Date.now()-3600000*1}
+  ]},
+  {id:'t2',title:'📌 Normas de uso del foro — Leedlas antes de publicar',content:'Bienvenidos al foro de TIRH-O. Mantened el respeto y el tema sobre el tiro deportivo. Mensajes ofensivos serán eliminados.',authorName:'Admin TIRH',authorId:'u5',replyCount:0,isPinned:true,timestamp:Date.now()-86400000*30,replies:[]},
+  {id:'t3',title:'Problema con registro en competición provincial',content:'Al intentar inscribirme en la tirada provincial me da error de "usuario ya registrado". ¿Alguien más tiene el mismo problema?',authorName:'María Fernández',authorId:'u2',replyCount:1,isPinned:false,timestamp:Date.now()-3600000*12,replies:[
+    {id:'r3',content:'Sí, le pasó a un compañero. Contacta con el admin directamente.',authorName:'Juan García',timestamp:Date.now()-3600000*10}
+  ]},
+];
+
+// CompetitionSession.kt (mock history)
+const SESSIONS = [
+  {id:'s1',shooterId:'u1',shooterName:'Juan García',discipline:'Pistola Estándar (Competición)',totalScore:284,category:'Sénior',club:'Del. Almería',competitionId:'c4',isOfficial:true,isPublished:true,timestamp:Date.now()-86400000*3,seriesScores:[46,48,47,49,47,47]},
+  {id:'s2',shooterId:'u1',shooterName:'Juan García',discipline:'Fuego Central (Entrenamiento)',totalScore:271,category:'Sénior',club:'Del. Almería',competitionId:null,isOfficial:false,isPublished:true,timestamp:Date.now()-86400000*10,seriesScores:[44,46,45,46,44,46]},
+  {id:'s3',shooterId:'u1',shooterName:'Juan García',discipline:'Pistola 9mm (Entrenamiento)',totalScore:263,category:'Sénior',club:'Del. Almería',competitionId:null,isOfficial:false,isPublished:true,timestamp:Date.now()-86400000*18,seriesScores:[42,44,45,44,43,45]},
+  {id:'s4',shooterId:'u2',shooterName:'María Fernández',discipline:'Pistola Estándar (Competición)',totalScore:271,category:'Damas',club:'Del. Almería',competitionId:'c4',isOfficial:true,isPublished:true,timestamp:Date.now()-86400000*3,seriesScores:[44,45,46,45,44,47]},
+];
+
+const SCORE_HISTORY=[{m:'Oct',s:258},{m:'Nov',s:265},{m:'Dic',s:261},{m:'Ene',s:268},{m:'Feb',s:271},{m:'Mar',s:284}];
+
+const LIVE=[
+  {pos:1,name:'Juan García',cat:'Sénior',club:'Del. Almería',score:284},
+  {pos:2,name:'María Fernández',cat:'Damas',club:'Del. Almería',score:278},
+  {pos:3,name:'Antonio López',cat:'Veterano',club:'CD Almería',score:265},
+  {pos:4,name:'Pedro Martínez',cat:'Sénior',club:'CD Almería',score:258},
+  {pos:5,name:'Laura Sánchez',cat:'Damas',club:'Del. Almería',score:251},
+  {pos:6,name:'Roberto Díaz',cat:'Veterano',club:'CD Granada',score:247},
+];
+
+// CompetitionType.kt — exact phases
+const CTYPES = {
+  STANDARD:{name:'Pistola Estándar',phases:[{name:'Fase 150"',secs:150,series:4,hasTrial:true},{name:'Fase 20"',secs:20,series:4,hasTrial:false},{name:'Fase 10"',secs:10,series:4,hasTrial:false}],shots:5},
+  CENTER:{name:'Fuego Central',phases:[{name:'Precisión (5\')',secs:300,series:6,hasTrial:true},{name:'Duelo (3"/7")',secs:3,series:6,hasTrial:true,isDuel:true,minScore:5}],shots:5},
+  NINE:{name:'Pistola 9mm',phases:[{name:'Precisión (150")',secs:150,series:6,hasTrial:true},{name:'Fase Rápida (20")',secs:20,series:6,hasTrial:false,minScore:5}],shots:5},
+};
+
+// Weapon.kt (user weapons)
+let MY_WEAPONS = [
+  {id:'w1',alias:'Glock 17',brand:'Glock',model:'17',caliber:'9mm Parabellum',guideNumber:'G-12345',totalShots:1847,lastMaintenanceShots:800,maintenanceInterval:2000},
+  {id:'w2',alias:'Walther P22',brand:'Walther',model:'P22',caliber:'22 LR',guideNumber:'W-98765',totalShots:423,lastMaintenanceShots:0,maintenanceInterval:1000},
+];
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+let CU = null, authMode = 'login', calYear = 2026, calMonth = 4, compFilter = 'all';
+let activeThread = null, editingProfile = false, prepTime = 60;
+let isCompMode = false;
+let tvInt = null, tvCatIdx = 0;
+const TV_CATS = ['SÉNIOR','DAMAS','VETERANO'];
+
+// PracticeUiState (mirrors Kotlin exactly)
+let P = {
+  type:'STANDARD', phaseIdx:0, seriesIdx:1, // 0=trial, 1..n=series
+  scores:{}, impacts:{},
+  timerSecs:0, timerMax:150,
+  state:'IDLE', timerInt:null, prepInt:null, vis:false,
+  duelShot:0,
+};
+
+// ════════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════════
+function switchAuth(t){authMode=t;document.querySelectorAll('.l-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='login')||(i===1&&t==='register')));document.getElementById('lf-login').style.display=t==='login'?'block':'none';document.getElementById('lf-register').style.display=t==='register'?'block':'none';if(t==='register')initProvinceSelects();}
+function initProvinceSelects(){const provs=Object.keys(PROV_CLUBS);['r-province','ep-province'].forEach(id=>{const s=document.getElementById(id);if(!s)return;const cur=s.value;s.innerHTML='<option value="">Selecciona provincia…</option>'+provs.map(p=>`<option${p===cur?' selected':''}>${p}</option>`).join('');});}
+function fillClubs(provId,clubId,search=''){
+  const prov=document.getElementById(provId)?.value;const cl=document.getElementById(clubId);if(!cl)return;
+  const clubs=(PROV_CLUBS[prov]||[]).filter(c=>c.toLowerCase().includes(search.toLowerCase()));
+  cl.innerHTML=clubs.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function filterClubList(q){fillClubs('ep-province','ep-club',q);}
+function doLogin(){
+  const e=document.getElementById('l-email').value.trim(),p=document.getElementById('l-pass').value,err=document.getElementById('l-err');
+  if(!e||!p){err.textContent='Email y contraseña son requeridos';err.style.display='block';return;}
+  err.style.display='none';
+  bootApp(USERS.find(u=>u.email===e)||{...USERS[0],name:e.split('@')[0],displayName:e.split('@')[0],uid:'u_demo',email:e});
+}
+function doRegister(){
+  const name=document.getElementById('r-name').value.trim(),email=document.getElementById('r-email').value.trim();
+  if(!name||!email){alert('Nombre y email son obligatorios');return;}
+  const missing=[];
+  if(!document.getElementById('r-dni').value)missing.push('DNI');
+  if(!document.getElementById('r-lic').value)missing.push('Licencia');
+  if(!document.getElementById('r-exp').value)missing.push('Caducidad');
+  bootApp({uid:'u_new',name,displayName:name,email,role:'SHOOTER',category:'Sénior',license:document.getElementById('r-lic').value||'Pendiente',licenseExpiryDate:null,dni:document.getElementById('r-dni').value||'',province:document.getElementById('r-province').value||'Almería',club:document.getElementById('r-club').value||'Delegación Almería',phoneNumber:'',birthDate:null,weaponModel:'',expiry:'—'});
+}
+function doLogout(){CU=null;stopTimer();document.getElementById('screen-login').style.display='flex';document.getElementById('main-app').style.display='none';document.getElementById('l-email').value='';document.getElementById('l-pass').value='';}
+function bootApp(u){CU=u;document.getElementById('screen-login').style.display='none';document.getElementById('main-app').style.display='flex';applyRole();renderAll();}
+
+function applyRole(){
+  const r=CU.role,ini=CU.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  ['sb-av','prof-av'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ini;});
+  document.getElementById('sb-name').textContent=CU.name;
+  document.getElementById('sb-role').textContent={OWNER:'Owner',ADMIN:'Admin',REFEREE:'Árbitro',SHOOTER:'Tirador'}[r]||r;
+  document.getElementById('prof-name').textContent=CU.name;
+  document.getElementById('prof-role').textContent=`${r==='SHOOTER'?'Tirador':r} · ${CU.category}`;
+  const meta=document.getElementById('prof-meta');
+  if(meta)meta.innerHTML=`<span>📍 ${CU.province}</span><span>🏢 ${CU.club}</span><span>🔒 ${CU.license}</span>${CU.phoneNumber?`<span>📞 ${CU.phoneNumber}</span>`:''}`;
+  const pro=r==='REFEREE'||r==='ADMIN'||r==='OWNER';
+  document.getElementById('nav-pro').style.display=pro?'block':'none';
+  document.getElementById('nav-arb').style.display=pro?'flex':'none';
+  document.getElementById('nav-adm').style.display=(r==='ADMIN'||r==='OWNER')?'flex':'none';
+  document.getElementById('adm-new-comp').style.display=(r==='ADMIN'||r==='OWNER')?'flex':'none';
+  prefillEditForm();
+  checkMissingData();
+  updateQR();
+}
+
+function checkMissingData(){
+  if(!CU)return;
+  const missing=[];
+  if(!CU.dni||CU.dni==='—')missing.push('DNI');
+  if(!CU.license||CU.license==='—'||CU.license==='Pendiente')missing.push('Nº Licencia');
+  if(!CU.licenseExpiryDate)missing.push('Fecha Caducidad');
+  if(!CU.phoneNumber)missing.push('Teléfono');
+  if(!CU.birthDate)missing.push('F. Nacimiento');
+  const el=document.getElementById('missing-data-alert');
+  const sf=document.getElementById('missing-fields');
+  if(el&&sf){el.style.display=missing.length&&CU.role==='SHOOTER'?'flex':'none';sf.textContent=missing.join(', ');}
+}
+
+function prefillEditForm(){
+  if(!CU)return;
+  initProvinceSelects();
+  const f=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  f('ep-name',CU.displayName||CU.name);f('ep-dni',CU.dni);f('ep-lic',CU.license);f('ep-phone',CU.phoneNumber);
+  f('ep-weapon',CU.weaponModel);f('ep-guide',CU.weaponsGuide||'');
+  const ep=document.getElementById('ep-province');if(ep){ep.value=CU.province;fillClubs('ep-province','ep-club');}
+  setTimeout(()=>{const ec=document.getElementById('ep-club');if(ec)ec.value=CU.club;},50);
+}
+
+// ════════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════════
+function go(page){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const el=document.getElementById('page-'+page);if(el)el.classList.add('active');
+  document.querySelectorAll('.ni').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+page+"'"))b.classList.add('active');});
+  const titles={inicio:'Inicio',practica:'Sesión de Tiro',calendario:'Calendario',comunicaciones:'Comunicaciones',envivo:'En Vivo',arbitro:'Panel Árbitro',admin:'Gestión',perfil:'Área Personal'};
+  document.getElementById('tb-title').textContent=titles[page]||page.toUpperCase();
+  if(page==='practica')initP();
+  if(page==='calendario')renderCal();
+  if(page==='perfil'){renderSessions();renderWeapons();renderProfileStats();checkProfileAlerts();}
+  closeSB();
+}
+
+// ════════════════════════════════════════════════════════════
+// RENDER ALL
+// ════════════════════════════════════════════════════════════
+function renderAll(){
+  initProvinceSelects();
+  renderHomeComps();renderHomeAlerts();renderScoreChart();
+  renderComps();renderNews();renderLive();renderForum();
+  renderReferee();renderAdmin();initP();renderCal();
+  renderSessions();renderWeapons();renderProfileStats();checkProfileAlerts();
+}
+
+// ── HELPERS ──
+function levelColor(l){return{TRAINING:'#888',TERRITORIAL:'var(--blue)',PROVINCIAL:'#FFA726',AUTONOMIC:'var(--green)',NATIONAL:'var(--tactical-red)',INTERNATIONAL:'#CE93D8'}[l]||'#888';}
+function levelPill(l){const labels={TRAINING:'Entreno',TERRITORIAL:'Territorial',PROVINCIAL:'Provincial',AUTONOMIC:'Autonómica',NATIONAL:'Nacional',INTERNATIONAL:'Internacional'};const cls={TRAINING:'p-silver',TERRITORIAL:'p-blue',PROVINCIAL:'p-orange',AUTONOMIC:'p-green',NATIONAL:'p-red',INTERNATIONAL:'p-red'};return`<span class="pill ${cls[l]||'p-silver'}">${labels[l]||l}</span>`;}
+function rolePill(r){return{OWNER:'<span class="pill p-red">Owner</span>',ADMIN:'<span class="pill p-red">Admin</span>',REFEREE:'<span class="pill p-gold">Árbitro</span>',SHOOTER:'<span class="pill p-silver">Tirador</span>'}[r]||r;}
+function ago(ts){const d=Date.now()-ts;if(d<3600000)return`Hace ${Math.floor(d/60000)} min`;if(d<86400000)return`Hace ${Math.floor(d/3600000)} h`;return`Hace ${Math.floor(d/86400000)} días`;}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});}
+
+// ── HOME ──
+function renderHomeComps(){
+  const tb=document.getElementById('home-comp-tb');if(!tb)return;
+  tb.innerHTML=COMPS.slice(0,3).map(c=>`<tr><td><b style="font-size:13px">${c.name}</b><br><small style="color:var(--muted)">${c.discipline}</small></td><td style="white-space:nowrap;font-size:12px">${c.dateStr}</td><td>${levelPill(c.level)}</td><td>${CU&&c.registered.includes(CU.uid)?'<span class="pill p-green">Inscrito</span>':'<button class="btn btn-primary" style="padding:2px 7px;font-size:10px" onclick="alert(\'Inscripción confirmada ✓\')">Inscribir</button>'}</td></tr>`).join('');
+}
+
+function renderHomeAlerts(){
+  const box=document.getElementById('home-alerts');if(!box||!CU)return;
+  const alerts=[];
+  // License expiry
+  if(CU.licenseExpiryDate){const days=Math.floor((CU.licenseExpiryDate-Date.now())/(86400000));if(days<30)alerts.push(`<div class="alert-card alert-red"><svg width="15" height="15" viewBox="0 0 24 24" fill="var(--tactical-red)"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><div style="font-size:12px"><b>Licencia federal</b> — ${days>0?`Caduca en ${days} días`:'¡Ha caducado!'} (${new Date(CU.licenseExpiryDate).toLocaleDateString('es-ES')})</div></div>`);}
+  // Weapon maintenance
+  MY_WEAPONS.forEach(w=>{const shots=w.totalShots-w.lastMaintenanceShots;const pct=shots/w.maintenanceInterval;if(pct>=0.9){const left=w.maintenanceInterval-shots;alerts.push(`<div class="alert-card alert-gold"><svg width="15" height="15" viewBox="0 0 24 24" fill="var(--gold-target)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><div style="font-size:12px"><b>Mantenimiento ${w.alias}</b> — ${left>0?`Revisión en ${left} disparos`:'¡Revisión necesaria!'}</div></div>`);}});
+  box.innerHTML=alerts.join('');
+}
+
+function checkProfileAlerts(){
+  const box=document.getElementById('prof-alerts');if(!box||!CU)return;
+  box.innerHTML='';
+  if(CU.licenseExpiryDate){const days=Math.floor((CU.licenseExpiryDate-Date.now())/(86400000));if(days<30)box.innerHTML+=`<div class="alert-card alert-red" style="margin-bottom:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="var(--tactical-red)"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><div style="font-size:12px"><b>Licencia por caducar</b> — ${days>0?`Caduca en ${days} días`:'¡Ha caducado!'}</div></div>`;}
+  MY_WEAPONS.forEach(w=>{const shots=w.totalShots-w.lastMaintenanceShots;const left=w.maintenanceInterval-shots;if(shots>=w.maintenanceInterval*0.9)box.innerHTML+=`<div class="alert-card alert-gold" style="margin-bottom:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="var(--gold-target)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg><div style="font-size:12px"><b>Mantenimiento: ${w.alias}</b> — ${left>0?`Quedan ${left} disparos`:'¡Revisión necesaria!'}</div></div>`;});
+}
+
+// ── SCORE CHART ──
+function renderScoreChart(){
+  const wrap=document.getElementById('score-chart');if(!wrap)return;
+  const max=Math.max(...SCORE_HISTORY.map(s=>s.s));const min=Math.min(...SCORE_HISTORY.map(s=>s.s))-10;
+  wrap.innerHTML=SCORE_HISTORY.map((s,i)=>{
+    const pct=((s.s-min)/(max-min+5))*100;const isLast=i===SCORE_HISTORY.length-1;
+    return`<div class="ch-bar-col"><div class="ch-bar" style="height:${pct}%;background:${isLast?'var(--gold-target)':'var(--tactical-red)'}"><div class="ch-val">${s.s}</div></div><div class="ch-lbl">${s.m}</div></div>`;
+  }).join('');
+}
+
+// ── COMPETITIONS ──
+function renderComps(f=compFilter){
+  compFilter=f;
+  const filtered=f==='all'?COMPS:f==='inscrito'?COMPS.filter(c=>CU&&c.registered.includes(CU.uid)):COMPS.filter(c=>c.level===f);
+  const make=c=>`<div class="comp-card"><div class="comp-lvl-tag" style="background:${levelColor(c.level)}">${c.level}</div>
+    <div class="comp-name">${c.name}</div>
+    <div class="comp-meta"><span>📅 ${c.dateStr} · ${c.time}</span><span>📍 ${c.location}</span><span>🎯 ${c.discipline}</span></div>
+    <p style="font-size:11px;color:var(--muted);line-height:1.5">${c.description}</p>
+    <div class="comp-footer"><span style="font-size:10px;color:var(--muted)">${c.registered.length+c.manualRegistrations.length} inscritos</span>
+    <div style="display:flex;gap:5px">${levelPill(c.level)} ${CU&&c.registered.includes(CU.uid)?'<span class="pill p-green">Inscrito</span>':'<button class="btn btn-primary" style="padding:2px 7px;font-size:10px" onclick="event.stopPropagation();alert(\'Inscripción realizada ✓\')">Inscribir</button>'}</div></div></div>`;
+  const cc=document.getElementById('comp-cards');if(cc)cc.innerHTML=filtered.map(make).join('');
+  const ac=document.getElementById('adm-comp-list');if(ac)ac.innerHTML=COMPS.map(make).join('');
+}
+function filterC(f){renderComps(f);}
+
+// ── CALENDAR ──
+const MONTHS=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+function calMove(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function renderCal(){
+  const title=document.getElementById('cal-title');if(title)title.textContent=`${MONTHS[calMonth]} ${calYear}`;
+  const grid=document.getElementById('cal-grid');if(!grid)return;
+  const first=new Date(calYear,calMonth,1);let dow=first.getDay()-1;if(dow<0)dow=6;
+  const dim=new Date(calYear,calMonth+1,0).getDate(),dip=new Date(calYear,calMonth,0).getDate();
+  const today=new Date();let cells=[];
+  for(let i=dow-1;i>=0;i--)cells.push({day:dip-i,curr:false});
+  for(let d=1;d<=dim;d++){const comps=COMPS.filter(c=>{const cd=new Date(c.date);return cd.getFullYear()===calYear&&cd.getMonth()===calMonth&&cd.getDate()===d;});const isT=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;cells.push({day:d,curr:true,comps,isToday:isT});}
+  let n=1;while(cells.length%7)cells.push({day:n++,curr:false});
+  grid.innerHTML=cells.map(c=>`<div class="cal-day${!c.curr?' other':''}${c.isToday?' today':''}" onclick="${c.curr&&c.comps?.length?`showCalDay(${c.day})`:''}">
+    <div class="cal-day-num">${c.day}</div>
+    <div style="display:flex;flex-wrap:wrap;margin-top:2px">${(c.comps||[]).map(cp=>`<span class="cal-dot" style="background:${levelColor(cp.level)}" title="${cp.name}"></span>`).join('')}</div>
+  </div>`).join('');
+}
+function showCalDay(day){const comps=COMPS.filter(c=>{const cd=new Date(c.date);return cd.getFullYear()===calYear&&cd.getMonth()===calMonth&&cd.getDate()===day;});if(!comps.length)return;alert(comps.map(c=>`📅 ${c.name}\n🎯 ${c.discipline} · ${c.time}\n📍 ${c.location}\n${c.description}`).join('\n\n'));}
+
+// ── COMUNICACIONES (NewsScreen tabs) ──
+function switchNewsTab(tab,btn){
+  document.querySelectorAll('.news-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('news-panel').style.display=tab==='noticias'?'block':'none';
+  document.getElementById('foro-panel').style.display=tab==='foro'?'block':'none';
+}
+
+function renderNews(){
+  const html=NEWS.map(n=>`<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="openNewsDetail('${n.id}')">
+    <div class="card-body">
+      ${n.isPinned?'<div style="font-family:var(--fc);font-size:9px;letter-spacing:1px;color:var(--gold-target);margin-bottom:5px">📌 FIJADO</div>':''}
+      <div style="font-family:var(--fc);font-size:14px;font-weight:700;margin-bottom:5px">${n.subject}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:8px">${n.body.slice(0,120)}${n.body.length>120?'…':''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-family:var(--fc)">
+        <span>Por ${n.senderName}</span><span>${ago(n.timestamp)}</span><span>👥 ${n.recipientCount} destinatarios</span>
+      </div>
+    </div>
+  </div>`).join('');
+  ['news-list','adm-news-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=html;});
+}
+function openNewsDetail(id){const n=NEWS.find(x=>x.id===id);if(!n)return;alert(`📰 ${n.subject}\n\n${n.body}\n\n— ${n.senderName}, ${ago(n.timestamp)}`);}
+
+// ── FORUM ──
+function renderForum(){
+  const list=document.getElementById('forum-list');if(!list)return;
+  const admTb=document.getElementById('adm-forum-tb');
+  list.innerHTML=[...THREADS].sort((a,b)=>b.isPinned-a.isPinned||b.timestamp-a.timestamp).map(t=>`
+    <div class="thread-card" onclick="openThread('${t.id}')">
+      <div style="display:flex;align-items:start;justify-content:space-between;gap:8px;margin-bottom:4px">
+        <div style="font-family:var(--fc);font-size:13px;font-weight:700">${t.title}</div>
+        ${t.isPinned?'<span class="pill p-gold" style="flex-shrink:0">Fijado</span>':''}
+      </div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px">${t.content.slice(0,100)}${t.content.length>100?'…':''}</div>
+      <div style="display:flex;gap:10px;font-size:10px;color:var(--muted);font-family:var(--fc)">
+        <span><b>${t.authorName}</b></span><span>${ago(t.timestamp)}</span><span>💬 ${t.replies.length}</span>
+      </div>
+    </div>`).join('');
+  if(admTb)admTb.innerHTML=THREADS.map(t=>`<tr><td><b>${t.title}</b></td><td>${t.authorName}</td><td>${t.replies.length}</td><td style="font-size:11px;color:var(--muted)">${ago(t.timestamp)}</td><td><button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;color:var(--tactical-red)" onclick="deleteThread('${t.id}')">Eliminar</button></td></tr>`).join('');
+}
+
+function openThread(id){
+  activeThread=THREADS.find(t=>t.id===id);if(!activeThread)return;
+  const el=document.getElementById('tv-content');
+  el.innerHTML=`<div class="modal-title" style="font-size:17px;padding-right:20px">${activeThread.title}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-family:var(--fc)">Por <b>${activeThread.authorName}</b> · ${ago(activeThread.timestamp)}</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--silver-badge);margin-bottom:12px;background:var(--dark-grey);border-radius:5px;padding:10px">${activeThread.content}</div>
+    <div style="font-family:var(--fc);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">${activeThread.replies.length} Respuestas</div>
+    ${activeThread.replies.map(r=>`<div class="reply-card"><div style="font-family:var(--fc);font-size:11px;color:var(--gold-target);margin-bottom:3px"><b>${r.authorName}</b> · ${ago(r.timestamp)}</div><div style="font-size:12px;line-height:1.6">${r.content}</div></div>`).join('')}`;
+  document.getElementById('reply-body').value='';
+  openM('m-thread-view');
+}
+function postReply(){
+  if(!activeThread||!CU)return;
+  const body=document.getElementById('reply-body').value.trim();if(!body)return;
+  activeThread.replies.push({id:'r'+Date.now(),content:body,authorName:CU.name,timestamp:Date.now()});
+  renderForum();openThread(activeThread.id);
+}
+function postThread(){
+  const title=document.getElementById('th-title').value.trim();if(!title)return;
+  THREADS.unshift({id:'t'+Date.now(),title,content:document.getElementById('th-body').value||'',authorName:CU?.name||'Usuario',authorId:CU?.uid||'u_demo',replies:[],timestamp:Date.now(),isPinned:false});
+  renderForum();closeM('m-thread');document.getElementById('th-title').value='';document.getElementById('th-body').value='';
+}
+function deleteThread(id){
+  const t=THREADS.find(x=>x.id===id);
+  if(!t){return;}
+  if(!canDeleteThread(t.authorId)){alert('Solo el autor o un Admin pueden eliminar este hilo');return;}
+  if(confirm('¿Eliminar este hilo y todas sus respuestas?')){THREADS=THREADS.filter(x=>x.id!==id);renderForum();}
+}
+
+// ── LIVE ──
+function renderLive(cat=''){
+  const rows=cat?LIVE.filter(r=>r.cat===cat):LIVE;
+  const tb=document.getElementById('live-table');if(!tb)return;
+  tb.innerHTML=rows.map(r=>`<tr><td><b style="font-family:var(--fd);font-size:15px">${r.pos}</b></td><td><b>${r.name}</b></td><td>${r.cat}</td><td style="color:var(--muted);font-size:11px">${r.club}</td><td><b style="font-family:var(--fd);font-size:20px;color:${r.pos===1?'var(--gold-target)':r.pos===2?'var(--silver-badge)':r.pos===3?'#CD7F32':'var(--white-smoke)'}">${r.score}</b></td></tr>`).join('');
+}
+function filterLive(v){renderLive(v);}
+
+// ── ÁRBITRO ──
+function renderReferee(){
+  const cont=document.getElementById('ref-shooters');if(!cont)return;
+  const type=CTYPES[P.type];
+  const pt=document.getElementById('ref-ph-tabs');
+  if(pt)pt.innerHTML=type.phases.map((p,i)=>`<button class="ph-tab${i===0?' active':''}" onclick="setRefPh(${i},this)">${p.name}</button>`).join('');
+  const cat=document.getElementById('ref-cat')?.value||'';
+  const sortByScore=document.getElementById('ref-sort')?.checked||false;
+  let shooters=[
+    {num:1,name:'Juan García',cat:'Sénior',license:'A-2341',isManual:false,score:null},
+    {num:2,name:'María Fernández',cat:'Damas',license:'A-2342',isManual:false,score:null},
+    {num:3,name:'Antonio López',cat:'Veterano',license:'A-2343',isManual:false,score:null},
+    {num:4,name:'Pedro Martínez',cat:'Sénior',license:'A-2344',isManual:false,score:null},
+    {num:5,name:'Laura Sánchez',cat:'Damas',license:'A-2345',isManual:false,score:null},
+  ];
+  if(cat)shooters=shooters.filter(s=>s.cat===cat);
+  cont.innerHTML=shooters.map(s=>`<div class="sh-row">
+    <div style="font-family:var(--fd);font-size:16px;color:var(--muted);width:24px;text-align:center">${s.num}</div>
+    ${s.isManual?'<span class="pill p-blue" style="margin-right:2px">M</span>':''}
+    <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.name}</div><div style="font-size:10px;color:var(--muted);font-family:var(--fc)">${s.cat} · ${s.license}</div></div>
+    <div style="display:flex;gap:3px;align-items:center">
+      ${Array(type.shots).fill(0).map(()=>`<input class="sc-inp" type="number" min="0" max="10" placeholder="—" oninput="calcRefTot(this)">`).join('')}
+      <div style="font-family:var(--fd);font-size:18px;color:var(--gold-target);width:38px;text-align:right;flex-shrink:0">—</div>
+    </div></div>`).join('');
+}
+function setRefPh(i,btn){document.querySelectorAll('#ref-ph-tabs .ph-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('ref-ph-title').textContent=`Fase: ${CTYPES[P.type].phases[i].name}`;}
+function calcRefTot(inp){const row=inp.closest('.sh-row');let t=0;row.querySelectorAll('.sc-inp').forEach(i=>{if(i.value)t+=parseInt(i.value)||0;});const td=row.querySelector('div[style*="38px"]');if(td)td.textContent=t||'—';}
+function addManualShooter(){const name=document.getElementById('manual-name').value.trim();if(!name)return;alert(`Tirador "${name}" inscrito manualmente ✓`);closeM('m-manual');}
+
+// ── ADMIN ──
+function renderAdmin(){
+  const tb=document.getElementById('adm-u-tb');if(!tb)return;
+  tb.innerHTML=USERS.map(u=>`<tr><td><b>${u.name}</b></td><td style="color:var(--muted);font-size:11px">${u.email}</td><td>${rolePill(u.role)}</td><td>${u.category}</td><td style="font-family:var(--fc)">${u.license}</td><td style="font-size:11px;color:var(--muted)">${u.expiry}</td><td style="font-size:11px;color:var(--muted)">${u.province}</td><td><button class="btn btn-ghost" style="padding:2px 6px;font-size:10px" onclick="alert('Editar ${u.name}')">✏</button></td></tr>`).join('');
+  const stb=document.getElementById('adm-sess-tb');if(stb)stb.innerHTML=SESSIONS.map(s=>`<tr><td><b>${s.shooterName}</b></td><td style="font-size:11px">${s.discipline}</td><td><b style="font-family:var(--fd);font-size:17px;color:var(--gold-target)">${s.totalScore}</b></td><td>${s.category}</td><td style="font-size:11px;color:var(--muted)">${s.club}</td><td>${s.isOfficial?'<span class="pill p-red">Oficial</span>':'<span class="pill p-silver">Personal</span>'}</td><td style="font-size:11px;color:var(--muted)">${fmtDate(s.timestamp)}</td></tr>`).join('');
+}
+
+function exportCSV(){
+  if(!hasPrivilege()){alert('Solo ADMIN u OWNER pueden exportar datos');return;}
+  const rows=[['Nombre','Email','Rol','Categoría','Licencia','DNI','Provincia','Club','Teléfono','Caducidad'],...USERS.map(u=>[u.name,u.email,u.role,u.category,u.license,u.dni||'',u.province,u.club,u.phoneNumber||'',u.expiry])];
+  const csv='\uFEFF'+rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='tirh-o-usuarios.csv';a.click();
+}
+function createUser(){
+  if(!hasPrivilege()){alert('Solo ADMIN u OWNER pueden crear usuarios');return;}
+  const name=document.getElementById('nu-name').value.trim(),email=document.getElementById('nu-email').value.trim();
+  if(!name||!email){alert('Nombre y email son obligatorios');return;}
+  alert(`Usuario "${name}" creado correctamente ✓`);closeM('m-newuser');
+}
+function admTab(t,btn){document.querySelectorAll('.adm-tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.adm-panel').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.getElementById('adm-'+t).classList.add('active');}
+
+// ── PERFIL ──
+function toggleEdit(){
+  editingProfile=!editingProfile;
+  document.getElementById('edit-form').style.display=editingProfile?'block':'none';
+  document.getElementById('btn-edit').textContent=editingProfile?'✕ Cancelar':'✏ Editar';
+}
+
+function saveProfile(){
+  if(!CU)return;
+  // Rule: users update → own doc keeping same role, OR hasPrivilege()
+  // In web we always save own profile (same role preserved)
+  CU.displayName=document.getElementById('ep-name').value||CU.displayName;
+  CU.name=CU.displayName;
+  CU.dni=document.getElementById('ep-dni').value;
+  CU.license=document.getElementById('ep-lic').value;
+  CU.phoneNumber=document.getElementById('ep-phone').value;
+  CU.weaponModel=document.getElementById('ep-weapon').value;
+  CU.province=document.getElementById('ep-province').value;
+  CU.club=document.getElementById('ep-club').value;
+  CU.category=document.getElementById('ep-cat').value;
+  applyRole();checkMissingData();updateQR();
+  toggleEdit();
+  alert('Perfil guardado en Firestore ✓');
+}
+
+function renderProfileStats(){
+  const tb=document.getElementById('prof-stats-tb');if(!tb)return;
+  const mySess=SESSIONS.filter(s=>CU&&s.shooterId===CU.uid);
+  const best=mySess.length?Math.max(...mySess.map(s=>s.totalScore)):0;
+  const avg=mySess.length?(mySess.reduce((a,s)=>a+s.totalScore,0)/mySess.length).toFixed(1):0;
+  tb.innerHTML=`
+    <tr><td style="color:var(--muted)">Mejor puntuación</td><td style="text-align:right"><b style="font-family:var(--fd);font-size:18px;color:var(--gold-target)">${best||284}</b></td></tr>
+    <tr><td style="color:var(--muted)">Media temporada</td><td style="text-align:right"><b>${avg||'271.3'}</b></td></tr>
+    <tr><td style="color:var(--muted)">Sesiones registradas</td><td style="text-align:right"><b>${mySess.length||3}</b></td></tr>
+    <tr><td style="color:var(--muted)">Disparos totales</td><td style="text-align:right"><b>${MY_WEAPONS.reduce((a,w)=>a+w.totalShots,0).toLocaleString('es-ES')}</b></td></tr>
+    <tr><td style="color:var(--muted)">Provincia</td><td style="text-align:right"><span class="pill p-silver">${CU?.province||'Almería'}</span></td></tr>`;
+}
+
+function renderWeapons(){
+  const box=document.getElementById('prof-weapons-list');if(!box)return;
+  box.innerHTML=MY_WEAPONS.map(w=>{
+    const shots=w.totalShots-w.lastMaintenanceShots;const pct=Math.min(100,shots/w.maintenanceInterval*100);const left=w.maintenanceInterval-shots;const near=pct>=90;
+    return`<div style="background:var(--light-grey);border-radius:5px;padding:11px">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div><b>${w.alias}</b> — <small style="color:var(--muted)">${w.caliber}</small><br><small style="color:var(--muted)">Guía: ${w.guideNumber}</small></div>
+        <div style="text-align:right"><div style="font-family:var(--fd);font-size:20px;color:${near?'var(--gold-target)':'var(--white-smoke)'}">${w.totalShots}</div><small style="color:var(--muted)">disparos</small></div>
+      </div>
+      <div style="background:var(--dark-grey);border-radius:2px;height:3px;margin-top:8px"><div style="background:${near?'var(--gold-target)':'var(--green)'};width:${pct.toFixed(0)}%;height:100%;border-radius:2px;transition:width .5s"></div></div>
+      <div style="font-size:10px;margin-top:3px;display:flex;justify-content:space-between">
+        <span style="color:${near?'var(--tactical-red)':'var(--muted)'}">${near?`⚠ Mantenimiento en ${Math.max(0,left)} disparos`:'✓ OK'}</span>
+        <span style="color:var(--muted)">${shots}/${w.maintenanceInterval}</span>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:7px">
+        <button class="btn btn-ghost" style="padding:2px 6px;font-size:10px" onclick="resetMaintenance('${w.id}')">↺ Reset mantenimiento</button>
+        <button class="btn btn-ghost" style="padding:2px 6px;font-size:10px;color:var(--tactical-red)" onclick="deleteWeapon('${w.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addWeapon(){
+  const w={id:'w'+Date.now(),alias:document.getElementById('w-alias').value||'Nueva arma',brand:document.getElementById('w-brand').value,model:document.getElementById('w-model').value,caliber:document.getElementById('w-cal').value,guideNumber:document.getElementById('w-guide').value,totalShots:0,lastMaintenanceShots:0,maintenanceInterval:parseInt(document.getElementById('w-interval').value)||1000};
+  MY_WEAPONS.push(w);renderWeapons();closeM('m-weapon');alert('Arma registrada ✓');
+}
+function deleteWeapon(id){if(confirm('¿Eliminar esta arma?')){MY_WEAPONS=MY_WEAPONS.filter(w=>w.id!==id);renderWeapons();}}
+function resetMaintenance(id){const w=MY_WEAPONS.find(x=>x.id===id);if(w){w.lastMaintenanceShots=w.totalShots;renderWeapons();alert('Contador de mantenimiento reiniciado ✓');}}
+
+function renderSessions(){
+  const box=document.getElementById('sess-list');if(!box||!CU)return;
+  const yr=document.getElementById('sess-year-filter')?.value||'';
+  const mySess=SESSIONS.filter(s=>{
+    if(s.shooterId!==CU.uid)return false;
+    if(!s.isPublished)return false;
+    if(yr){const y=new Date(s.timestamp).getFullYear().toString();if(y!==yr)return false;}
+    return true;
+  }).sort((a,b)=>b.timestamp-a.timestamp);
+  if(!mySess.length){box.innerHTML='<div style="text-align:center;padding:24px;font-family:var(--fc);font-size:12px;color:var(--muted)">No hay sesiones registradas</div>';return;}
+  box.innerHTML=mySess.map(s=>`<div class="sess-row" onclick="openSessDetail('${s.id}')">
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:13px">${s.discipline}</div>
+      <div style="font-size:10px;color:var(--muted);font-family:var(--fc)">${fmtDate(s.timestamp)} · ${s.club}</div>
+    </div>
+    ${s.isOfficial?'<span class="pill p-red">Oficial</span>':''}
+    <div style="font-family:var(--fd);font-size:24px;color:var(--gold-target)">${s.totalScore}</div>
+  </div>`).join('');
+}
+
+function openSessDetail(id){
+  const s=SESSIONS.find(x=>x.id===id);if(!s)return;
+  const el=document.getElementById('sess-detail-content');
+  el.innerHTML=`<div class="modal-title">${s.discipline}</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">${fmtDate(s.timestamp)} · ${s.club}</div>
+    <div style="text-align:center;margin-bottom:14px"><div style="font-family:var(--fd);font-size:52px;color:var(--gold-target)">${s.totalScore}</div><div style="font-family:var(--fc);font-size:11px;color:var(--muted);letter-spacing:1px">PUNTUACIÓN TOTAL</div></div>
+    <table style="width:100%"><thead><tr><th>Serie</th><th>Puntuación</th></tr></thead><tbody>
+    ${(s.seriesScores||[]).map((sc,i)=>`<tr><td>Serie ${i+1}</td><td><b style="font-family:var(--fd);font-size:16px">${sc}</b></td></tr>`).join('')}
+    </tbody></table>`;
+  openM('m-sess-detail');
+}
+
+// ── QR CODE ──
+function updateQR(){
+  const canvas=document.getElementById('qr-canvas');if(!canvas||!CU)return;
+  const ctx=canvas.getContext('2d');const sz=200,cells=21,cs=Math.floor(sz/cells);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+  const seed=(CU.license||'A-2341').split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const rng=n=>{let x=Math.sin(n+seed)*10000;return x-Math.floor(x);};
+  ctx.fillStyle='#000';
+  const fp=(x,y)=>{ctx.fillRect(x*cs,y*cs,7*cs,7*cs);ctx.fillStyle='#fff';ctx.fillRect((x+1)*cs,(y+1)*cs,5*cs,5*cs);ctx.fillStyle='#000';ctx.fillRect((x+2)*cs,(y+2)*cs,3*cs,3*cs);ctx.fillStyle='#000';};
+  fp(0,0);fp(14,0);fp(0,14);
+  for(let r=0;r<cells;r++)for(let c=0;c<cells;c++){
+    const inFP=(r<9&&c<9)||(r<9&&c>11)||(r>11&&c<9);
+    if(!inFP&&rng(r*cells+c)>0.5){ctx.fillStyle='#000';ctx.fillRect(c*cs,r*cs,cs,cs);}
+  }
+  document.getElementById('qr-name').textContent=CU.name;
+  document.getElementById('qr-lic').textContent=`Licencia: ${CU.license} · DNI: ${CU.dni||'N/A'}`;
+  document.getElementById('qr-cat').textContent=`${CU.category} · ${CU.club}`;
+}
+
+// ── PRÁCTICA / SESIÓN DE TIRO ──
+// mirrors PracticeViewModel + PracticeUiState exactly
+
+function setMode(isComp){
+  isCompMode=isComp;
+  document.getElementById('mode-train').style.cssText=!isComp?'background:var(--tactical-red);color:#fff':'';
+  document.getElementById('mode-train').className='btn'+(isComp?' btn-ghost':' btn-primary');
+  document.getElementById('mode-comp').className='btn'+(isComp?' btn-primary':' btn-ghost');
+  document.getElementById('prac-comp-wrap').style.display=isComp?'block':'none';
+}
+
+function setPrep(secs){
+  prepTime=secs;
+  document.querySelectorAll('[id^=prep-]').forEach(b=>{b.style.borderColor='';b.style.color='';});
+  const el=document.getElementById('prep-'+secs);if(el){el.style.borderColor='var(--tactical-red)';el.style.color='var(--tactical-red)';}
+}
+
+function initP(){
+  resetScores();
+  buildPH();buildSer();buildSG();updTimerDisp();
+}
+
+function selType(v){P.type=v;P.phaseIdx=0;P.seriesIdx=1;P.scores={};P.impacts={};stopTimer();initP();renderReferee();}
+
+function resetScores(){
+  const type=CTYPES[P.type];
+  type.phases.forEach((ph,pi)=>{
+    if(ph.hasTrial)P.scores[`${pi}_trial`]=Array(type.shots).fill(null);
+    for(let s=1;s<=ph.series;s++)P.scores[`${pi}_${s}`]=Array(type.shots).fill(null);
+  });
+}
+
+function buildPH(){
+  const el=document.getElementById('ph-tabs');if(!el)return;
+  el.innerHTML=CTYPES[P.type].phases.map((p,i)=>`<button class="ph-tab${i===P.phaseIdx?' active':''}" onclick="selPh(${i})">${p.name}</button>`).join('');
+}
+
+function buildSer(){
+  const el=document.getElementById('ser-tabs');if(!el)return;
+  const ph=CTYPES[P.type].phases[P.phaseIdx];
+  let html='';
+  if(ph.hasTrial){
+    const k=`${P.phaseIdx}_trial`;const done=P.scores[k]?.filter(v=>v!=null).length===CTYPES[P.type].shots;
+    html+=`<button class="ser-tab trial${P.seriesIdx===0?' active':''}${done?' done':''}" onclick="selSer(0)" title="Ensayo">E</button>`;
+  }
+  for(let i=1;i<=ph.series;i++){
+    const k=`${P.phaseIdx}_${i}`;const done=P.scores[k]?.filter(v=>v!=null).length===CTYPES[P.type].shots;
+    html+=`<button class="ser-tab${P.seriesIdx===i?' active':''}${done?' done':''}" onclick="selSer(${i})">${i}</button>`;
+  }
+  el.innerHTML=html;
+}
+
+function buildSG(){
+  const el=document.getElementById('sc-grid');if(!el)return;
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  const ex=P.scores[k]||[];const shots=CTYPES[P.type].shots;
+  el.innerHTML=Array(shots).fill(0).map((_,i)=>{const v=ex[i];const isL=i===ex.filter(x=>x!=null).length-1&&v!=null;return`<div class="sc-cell${v!=null?' entered':''}${isL?' latest':''}" onclick="editSc(${i})"><span class="del" onclick="event.stopPropagation();delSc(${i})">✕</span><span>${v!=null?v:'—'}</span></div>`;}).join('');
+  const st=document.getElementById('sc-title');if(st)st.textContent=P.seriesIdx===0?'Ensayo — Puntuaciones':`Serie ${P.seriesIdx} — Puntuaciones`;
+  updTots();
+}
+
+function editSc(i){
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  if(!P.scores[k])P.scores[k]=Array(CTYPES[P.type].shots).fill(null);
+  const ph=CTYPES[P.type].phases[P.phaseIdx];const minS=ph.minScore||0;
+  const v=prompt(`Disparo ${i+1} (${minS?'mín '+minS:'0-10'}):`,P.scores[k][i]??'');
+  if(v===null)return;const n=parseInt(v);if(isNaN(n)||n<0||n>10){alert('Valor entre 0 y 10');return;}
+  // minScore logic from PracticeViewModel.addScore
+  P.scores[k][i]=(n<minS&&n!==0)?minS:n;
+  buildSG();buildSer();if(P.vis)drawTarget();
+}
+function delSc(i){const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;if(P.scores[k])P.scores[k][i]=null;buildSG();buildSer();}
+
+function updTots(){
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  const s=P.scores[k]||[];const st=s.reduce((a,v)=>a+(v||0),0);
+  const se=document.getElementById('ser-tot');if(se)se.textContent=st;
+  let tot=0,shotsCount=0;
+  Object.entries(P.scores).forEach(([key,arr])=>{if(!key.includes('trial'))arr.forEach(v=>{if(v!=null){tot+=v;shotsCount++;}});});
+  const te=document.getElementById('tot-score');if(te)te.textContent=tot;
+  const avg=shotsCount>0?(tot/shotsCount).toFixed(2):0;
+  const ae=document.getElementById('sc-avg');if(ae&&shotsCount>0)ae.textContent=`Media: ${avg} por disparo`;
+}
+
+function selPh(i){P.phaseIdx=i;const ph=CTYPES[P.type].phases[i];P.seriesIdx=ph.hasTrial?0:1;stopTimer();buildPH();buildSer();buildSG();updTimerDisp();}
+function selSer(i){P.seriesIdx=i;buildSer();buildSG();if(P.vis)drawTarget();}
+
+// Timer — mirrors PracticeViewModel.startPractice() flow exactly
+function updTimerDisp(){
+  const ph=CTYPES[P.type].phases[P.phaseIdx];P.timerMax=ph.secs;P.timerSecs=ph.secs;
+  setTDisp(ph.secs,ph.secs);
+  const pi=document.getElementById('ph-info');
+  if(pi)pi.textContent=`${ph.name}${ph.isDuel?' · Duelo (3"/7")':''} · ${ph.series} series · ${CTYPES[P.type].shots} disparos/serie${ph.minScore?' · mín '+ph.minScore:''}`;
+  setSt('IDLE');
+}
+
+function setTDisp(s,max){
+  const el=document.getElementById('t-disp');const arc=document.getElementById('t-arc');
+  if(el)el.textContent=s>=3600?`${Math.floor(s/3600)}'${String(Math.floor((s%3600)/60)).padStart(2,'0')}`:s<60?s:`${Math.floor(s/60)}'${String(s%60).padStart(2,'0')}`;
+  if(arc){const pct=max>0?s/max:1;const circ=364.4;arc.style.strokeDashoffset=(circ*(1-pct)).toFixed(1);arc.style.stroke=s<=10?'var(--gold-target)':s<=30?'#FF7043':'var(--tactical-red)';}
+}
+
+function setSt(s){
+  P.state=s;
+  playStateSound(s);
+  const lb={IDLE:'EN REPOSO',PREPARATION:'PREPARACIÓN',ATTENTION:'ATENCIÓN',FIRE:'¡FUEGO!',DUEL_WAIT:'ESPERA',TRIAL_FIRE:'ENSAYO',FINISHED:'FINALIZADO'};
+  const el=document.getElementById('st-badge');if(el){el.className='st-badge st-'+s;el.textContent=lb[s]||s;}
+  const bs=document.getElementById('btn-start');const bst=document.getElementById('btn-stop');
+  if(bs)bs.style.display=(s==='IDLE'||s==='FINISHED')?'inline-flex':'none';
+  if(bst)bst.style.display=(s!=='IDLE'&&s!=='FINISHED')?'inline-flex':'none';
+  const tl=document.getElementById('t-lbl');if(tl)tl.textContent=s==='PREPARATION'?'PREPARACIÓN':'TIEMPO';
+}
+
+function startPhase(){
+  clearInterval(P.timerInt);clearInterval(P.prepInt);
+  const ph=CTYPES[P.type].phases[P.phaseIdx];
+  // PREPARATION
+  setSt('PREPARATION');let prep=prepTime;setTDisp(prep,prep);
+  P.prepInt=setInterval(()=>{
+    prep--;setTDisp(prep,prep);
+    if(prep<=0){
+      clearInterval(P.prepInt);
+      // ATTENTION (7s)
+      setSt('ATTENTION');let att=7;setTDisp(att,7);
+      P.timerInt=setInterval(()=>{att--;setTDisp(att,7);if(att<=0){clearInterval(P.timerInt);beginFire(ph);}},1000);
+    }
+  },1000);
+}
+
+function beginFire(ph){
+  if(P.seriesIdx===0){
+    // TRIAL FIRE
+    setSt('TRIAL_FIRE');P.timerSecs=150;setTDisp(150,150);
+    P.timerInt=setInterval(()=>{P.timerSecs--;setTDisp(P.timerSecs,150);if(P.timerSecs<=0){clearInterval(P.timerInt);setSt('FINISHED');}},1000);
+  } else if(ph.isDuel){
+    // DUEL MODE — repeating 3"/7" pairs
+    P.duelShot=0;runDuelShot(ph);
+  } else {
+    // STANDARD
+    setSt('FIRE');P.timerSecs=ph.secs;setTDisp(P.timerSecs,ph.secs);
+    P.timerInt=setInterval(()=>{P.timerSecs--;setTDisp(P.timerSecs,ph.secs);if(P.timerSecs<=0){clearInterval(P.timerInt);setSt('FINISHED');}},1000);
+  }
+}
+
+function runDuelShot(ph){
+  P.duelShot++;
+  const dc=document.getElementById('duel-counter');if(dc){dc.style.display='block';dc.textContent=`Disparo ${P.duelShot}/5`;}
+  if(P.duelShot>5){if(dc)dc.style.display='none';setSt('FINISHED');return;}
+  // FIRE 3s
+  setSt('FIRE');P.timerSecs=3;setTDisp(3,3);
+  P.timerInt=setInterval(()=>{P.timerSecs--;setTDisp(P.timerSecs,3);if(P.timerSecs<=0){
+    clearInterval(P.timerInt);
+    if(P.duelShot<5){
+      // WAIT 7s
+      setSt('DUEL_WAIT');P.timerSecs=7;setTDisp(7,7);
+      P.timerInt=setInterval(()=>{P.timerSecs--;setTDisp(P.timerSecs,7);if(P.timerSecs<=0){clearInterval(P.timerInt);runDuelShot(ph);}},1000);
+    } else {if(dc)dc.style.display='none';setSt('FINISHED');}
+  }},1000);
+}
+
+function stopTimer(){clearInterval(P.timerInt);clearInterval(P.prepInt);setSt('IDLE');const ph=CTYPES[P.type].phases[P.phaseIdx];setTDisp(ph.secs,ph.secs);const dc=document.getElementById('duel-counter');if(dc)dc.style.display='none';}
+
+function resetSess(){
+  stopTimer();P.scores={};P.impacts={};P.phaseIdx=0;
+  const ph=CTYPES[P.type].phases[0];P.seriesIdx=ph.hasTrial?0:1;
+  resetScores();buildPH();buildSer();buildSG();updTimerDisp();
+  document.getElementById('analysis-box').style.display='none';
+  if(P.vis)drawTarget();
+}
+
+function saveSess(){
+  // Rule: sessions write → isReferee() or own session (shooterId matches)
+  // In practice mode the shooter saves their own session — always allowed
+  // performAnalysis() from PracticeViewModel
+  let tot=0,shots=0;
+  Object.entries(P.scores).forEach(([k,arr])=>{if(!k.includes('trial'))arr.forEach(v=>{if(v!=null){tot+=v;shots++;}});});
+  const avg=shots>0?tot/shots:0;
+  const feedback=avg>=9.5?'¡Excelente desempeño! Estás a nivel de competición nacional.':avg>=8.5?'Muy buen nivel. Tienes una base sólida de precisión.':avg>=7?'Buen trabajo. Sigue practicando para estabilizar tu agrupación.':'Continúa entrenando. Concéntrate en la parada y la salida del disparo.';
+  const consistency=shots>5?'Alta (Desviación mínima entre series)':'Media (Fluctuación moderada)';
+  const rec=avg<8?'Prueba ejercicios de tiro en seco para mejorar el disparador.':'Mantén la regularidad en los entrenamientos.';
+  document.getElementById('an-feedback').textContent=feedback;
+  document.getElementById('an-cons').textContent=consistency;
+  document.getElementById('an-impr').textContent=avg>8?'Mejorando precisión central':'Enfocarse en agrupación';
+  document.getElementById('an-rec').textContent=rec;
+  document.getElementById('analysis-box').style.display='block';
+  // Add to sessions
+  SESSIONS.unshift({id:'s'+Date.now(),shooterId:CU?.uid||'u1',shooterName:CU?.name||'Tirador',discipline:`${CTYPES[P.type].name} (${isCompMode?'Competición':'Entrenamiento'})`,totalScore:tot,category:CU?.category||'Sénior',club:CU?.club||'N/A',competitionId:isCompMode?'c1':null,isOfficial:false,isPublished:true,timestamp:Date.now(),seriesScores:[]});
+  alert(`Sesión guardada en Firestore ✓\nTotal: ${tot} puntos · Media: ${avg.toFixed(2)}/disparo`);
+}
+
+// Interactive Target (InteractiveTarget.kt)
+function toggleVis(on){P.vis=on;document.getElementById('target-panel').style.display=on?'block':'none';if(on)setTimeout(drawTarget,50);}
+
+function drawTarget(){
+  const c=document.getElementById('target-canvas');if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height,cx=w/2,cy=h/2,mR=w/2-5;
+  ctx.fillStyle='#EEE';ctx.fillRect(0,0,w,h);
+  // Black center (rings 7-10)
+  ctx.beginPath();ctx.arc(cx,cy,mR*(11-7)/10,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
+  // All rings + numbers
+  for(let i=1;i<=10;i++){
+    const r=mR*(11-i)/10;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle=i>=7?'rgba(255,255,255,.5)':'rgba(0,0,0,.3)';ctx.lineWidth=0.7;ctx.stroke();
+    if(i<10){const rN=mR*(11-(i+1))/10,lx=cx+r-(r-rN)/2;ctx.fillStyle=i>=7?'rgba(255,255,255,.6)':'rgba(0,0,0,.45)';ctx.font=`bold ${Math.floor(mR/13)}px Barlow Condensed,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(i,lx,cy);}
+  }
+  // Centre dot + crosshairs
+  ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=.4;ctx.beginPath();ctx.moveTo(cx-mR,cy);ctx.lineTo(cx+mR,cy);ctx.stroke();ctx.beginPath();ctx.moveTo(cx,cy-mR);ctx.lineTo(cx,cy+mR);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,2.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  // Impacts
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  (P.impacts[k]||[]).forEach(imp=>{
+    const ix=imp.x*w,iy=imp.y*h;
+    ctx.beginPath();ctx.arc(ix,iy,7,0,Math.PI*2);ctx.fillStyle='rgba(229,57,53,.88)';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(mR/12)}px Barlow Condensed,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(imp.score,ix,iy);
+  });
+}
+
+function canvasClick(e){
+  if(!P.vis)return;
+  const c=document.getElementById('target-canvas');const rect=c.getBoundingClientRect();
+  const sx=c.width/rect.width,sy=c.height/rect.height;
+  const rx=(e.clientX-rect.left)*sx,ry=(e.clientY-rect.top)*sy;
+  const cx=c.width/2,cy=c.height/2,mR=cx-5;
+  const dx=rx-cx,dy=ry-cy,dist=Math.sqrt(dx*dx+dy*dy);if(dist>mR)return;
+  // Score calculation mirrors InteractiveTarget.kt exactly
+  const pct=dist/mR;
+  const score=pct<.1?10:pct<.2?9:pct<.3?8:pct<.4?7:pct<.5?6:pct<.6?5:pct<.7?4:pct<.8?3:pct<.9?2:1;
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  if(!P.impacts[k])P.impacts[k]=[];if(!P.scores[k])P.scores[k]=Array(CTYPES[P.type].shots).fill(null);
+  if((P.impacts[k]||[]).length>=CTYPES[P.type].shots)return;
+  P.impacts[k].push({x:rx/c.width,y:ry/c.height,score});
+  P.scores[k][P.impacts[k].length-1]=score;
+  drawTarget();buildSG();buildSer();
+}
+
+function undoImpact(){
+  const k=P.seriesIdx===0?`${P.phaseIdx}_trial`:`${P.phaseIdx}_${P.seriesIdx}`;
+  if(P.impacts[k]?.length){
+    P.impacts[k].pop();const s=P.scores[k];if(s){let last=-1;s.forEach((v,i)=>{if(v!=null)last=i;});if(last>=0)s[last]=null;}
+    drawTarget();buildSG();
+  }
+}
+
+// ── TV MODE (LiveLeaderboardScreen.kt) ──
+function openTV(){document.getElementById('tv-mode').classList.add('active');renderTV();tvInt=setInterval(()=>{tvCatIdx=(tvCatIdx+1)%TV_CATS.length;document.getElementById('tv-cat').textContent=TV_CATS[tvCatIdx];renderTV();},8000);setInterval(()=>{const cl=document.getElementById('tv-clock');if(cl)cl.textContent=new Date().toLocaleTimeString('es-ES');},1000);}
+function closeTV(){document.getElementById('tv-mode').classList.remove('active');clearInterval(tvInt);}
+function renderTV(){
+  const cat=TV_CATS[tvCatIdx];const rows=LIVE.filter(r=>r.cat.toUpperCase()===cat);
+  const list=document.getElementById('tv-list');if(!list)return;
+  list.innerHTML=rows.slice(0,6).map((r,i)=>`<div class="tv-row${i===0?' t1':i===1?' t2':i===2?' t3':''}"><div class="tv-pos">${r.pos}</div><div class="tv-name">${r.name}</div><div style="font-family:var(--fc);font-size:12px;color:var(--muted);width:80px;text-align:right">${r.cat}</div><div class="tv-score">${r.score}</div></div>`).join('');
+}
+
+// ── MISC ──
+function openM(id){document.getElementById(id).classList.add('show');if(id==='m-qr')setTimeout(updateQR,50);}
+function closeM(id){document.getElementById(id).classList.remove('show');}
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show');}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+
+window.addEventListener('load',()=>{
+  const c=document.getElementById('target-canvas');if(c)c.addEventListener('click',canvasClick);
+  initProvinceSelects();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('screen-login').style.display!=='none'){if(authMode==='login')doLogin();else doRegister();}});
+</script>
+</body></html>
